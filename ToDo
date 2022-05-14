@@ -1,0 +1,13 @@
+12-05-2022 -> 18-05-2022
+
+GUI:
+    -Redo the UI in QtDesigner with the required elements
+    -Design and assign the functions to the respective buttons
+
+Classes:
+    -Rest of the Vector3 methods (and maybe Vector4?)
+    -Transformation methods
+    -Review
+
+Parser:
+    -Everything
