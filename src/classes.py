@@ -142,8 +142,22 @@ class Hit:
 
 class Transformation:
 
-    def __init__(self):
-        pass
+    def __init__(self, matrix):
+        if not isinstance(matrix, list):
+            raise TypeError("Wrong matrix data type, needs to be a list of lists")
+        if not len(matrix) == 4:
+            raise TypeError("Wrong matrix, needs to be a 4x4 dimension matrix (list)")
+        for row in matrix:
+            if not isinstance(row, list) or len(row) != 4:
+                raise TypeError("Wrong matrix, needs to be a 4x4 dimension matrix (list)")
+        for row in matrix:
+            for column in row:
+                if not isinstance(column, int) and not isinstance(column, float):
+                    raise TypeError("Wrong matrix, values need to be of type int or float")
+        self.matrix = matrix
+    
+    def get_matrix(self):
+        return self.matrix
 
 
 

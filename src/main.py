@@ -17,7 +17,15 @@ def testes():
     #x.print_coordinates()
 
     # Transformation tests
-    matrix = Transformation()
+    originMatrix = [[0, 0, 0, 0],
+                    [0, 0, 0, 0],
+                    [0, 0, 0, 0],
+                    [0, 0, 0, 0]]
+
+    matrix = Transformation(originMatrix)
+
+    print(type(matrix))
+    print(type(matrix.get_matrix()))
 
     pass
 
