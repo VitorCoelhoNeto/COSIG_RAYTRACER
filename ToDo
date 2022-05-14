@@ -11,4 +11,4 @@ Classes:
     -Review
 
 Parser:
-    -Everything
+    -Everything (We need to add a open() file to app.py and pass the data structure (probably a dictionary) to the window() function)
