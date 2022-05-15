@@ -3,6 +3,9 @@ from app import *
 FILE_PATH = "..\\test_scene_1.txt"
 
 def testes():
+    """
+    Testing purposes
+    """
     # Color testing
     #testColor = Color3(250, 230, 100)
     #testColor = Color3(0.5, 0.451, 0.4)
@@ -35,5 +38,8 @@ def testes():
 
 
 if __name__ == "__main__":
+    """
+    Main function
+    """
     #window()
     testes()

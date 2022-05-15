@@ -12,3 +12,8 @@ Classes:
 
 Parser:
     -Everything (We need to add a open() file to app.py and pass the data structure (probably a dictionary) to the window() function)
+
+
+Doubts:
+    -No parser, nas transformations, uma transformation pode ter mais que 1 translation?
+    -Em objetos tipo Image e Material, o formato/conteúdo é sempre o mesmo?
