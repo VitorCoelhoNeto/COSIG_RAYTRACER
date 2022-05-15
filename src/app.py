@@ -9,3 +9,10 @@ def window():
     ui.setupUi(MainWindow)
     MainWindow.show()
     sys.exit(app.exec_())
+
+
+
+def parser(path):
+    with open(path) as file:
+        for line in file.readlines():
+            pass

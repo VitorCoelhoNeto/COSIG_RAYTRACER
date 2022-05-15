@@ -1,5 +1,7 @@
 from app import *
 
+FILE_PATH = "..\\test_scene_1.txt"
+
 def testes():
     # Color testing
     #testColor = Color3(250, 230, 100)
@@ -17,16 +19,17 @@ def testes():
     #x.print_coordinates()
 
     # Transformation tests
-    originMatrix = [[0, 0, 0, 0],
-                    [0, 0, 0, 0],
-                    [0, 0, 0, 0],
-                    [0, 0, 0, 0]]
+    #originMatrix = [[0, 0, 0, 0],
+    #                [0, 0, 0, 0],
+    #                [0, 0, 0, 0],
+    #                [0, 0, 0, 0]]
+    #
+    #matrix = Transformation(originMatrix)
+    #
+    #print(type(matrix))
+    #print(type(matrix.get_matrix()))
 
-    matrix = Transformation(originMatrix)
-
-    print(type(matrix))
-    print(type(matrix.get_matrix()))
-
+    parser(FILE_PATH)
     pass
 
 
