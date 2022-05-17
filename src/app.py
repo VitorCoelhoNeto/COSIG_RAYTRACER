@@ -225,6 +225,28 @@ def parser(path):
 
             if "Box" in line:
                 boxNumber = parse_boxes(boxNumber, imageContents, lines, iteration)
+            
+            if "Triangles" in line:
+                pass #TODO
+    
+    return imageContents
 
-    with open("temp.txt", "w", encoding="utf-8") as file2:
-        file2.write(json.dumps(imageContents, indent=5, separators=(',', ':')))
+
+
+    """"
+    Segmento Triangles
+    Este segmento descreve as propriedades de uma malha de triângulos.
+    Os parâmetros são o índice de transformação da malha, o qual se aplica a todos os triângulos; segue-
+    se, para cada triângulo da malha, o índice do material do triângulo e as coordenadas dos vértices do
+    triângulo. É assumido que o lado da frente do triângulo é aquele cujos vértices foram definidos no
+    sentido contrário ao do movimento dos ponteiros de um relógio.
+    Pode haver vários segmentos deste tipo.
+    Triangles {
+    transformação // aplica-se a todos os triângulos; índice (integer >= 0)
+    material // aplica-se a cada triângulo; índice (integer >= 0)
+    x y z // coordenadas do primeiro vértice (double)
+    x y z // coordenadas do segundo vértice (double)
+    x y z // coordenadas do terceiro vértice (double)
+    ...
+    }
+    """
