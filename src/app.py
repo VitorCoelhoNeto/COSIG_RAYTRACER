@@ -187,9 +187,43 @@ def parser(path):
         matIndex       = lines[iteration + BOX_MAT].strip()
         imageContents["Boxes"].update({boxNumber-1:{"Transformation":transformIndex, "Material":matIndex}})
         return boxNumber
+    
+
+    def parse_triangles(meshNumber, imageContents, lines, iteration):
+        """
+        Parses box objects.
+        :param int meshNumber: Current triangle meshes object count
+        :param list lines: Lines read from the scene file
+        :param int iteration: Current lines list iteration
+        :param dict imageContents: Dictionary containing objects' properties
+        :returns: meshNumber
+        :rtype: int
+        """
+        V_X = 0
+        V_Y = 1
+        V_Z = 2
+        TRANSFORM_LINE = iteration + 2
+        FIRST_TRIANG_LINE = iteration + 3
+        meshNumber += 1
+        # Add mesh and transformation
+        imageContents["TriangleMeshes"].update({meshNumber-1:{"Transformation":lines[TRANSFORM_LINE].strip(), "Triangles":{}}})
+
+        triangNumber = -1 #So it becomes 1 when we add the first triangle
+        for meshLineCount, meshLine in enumerate(lines[FIRST_TRIANG_LINE:]):
+            if "}" in meshLine:
+                break
+            # Add the triangles and their materials
+            if len(meshLine.strip().split()) == 1:
+                triangNumber += 1
+                imageContents["TriangleMeshes"][meshNumber-1]["Triangles"].update({triangNumber:{
+                "Material":lines[iteration+3+meshLineCount].strip(),
+                "(0,0)":lines[FIRST_TRIANG_LINE+meshLineCount + 1].strip().split()[V_X], "(0,1)":lines[FIRST_TRIANG_LINE+meshLineCount + 1].strip().split()[V_Y], "(0,2)":lines[FIRST_TRIANG_LINE+meshLineCount + 1].strip().split()[V_Z], 
+                "(1,0)":lines[FIRST_TRIANG_LINE+meshLineCount + 2].strip().split()[V_X], "(1,1)":lines[FIRST_TRIANG_LINE+meshLineCount + 2].strip().split()[V_Y], "(1,2)":lines[FIRST_TRIANG_LINE+meshLineCount + 2].strip().split()[V_Z], 
+                "(2,0)":lines[FIRST_TRIANG_LINE+meshLineCount + 3].strip().split()[V_X], "(2,1)":lines[FIRST_TRIANG_LINE+meshLineCount + 3].strip().split()[V_Y], "(2,2)":lines[FIRST_TRIANG_LINE+meshLineCount + 3].strip().split()[V_Z]}})
+        return meshNumber
 
 
-    imageContents = {"Images":{}, "Transformations":{}, "Materials":{}, "Cameras":{}, "Lights":{}, "Spheres":{}, "Boxes":{}}
+    imageContents = {"Images":{}, "Transformations":{}, "Materials":{}, "Cameras":{}, "Lights":{}, "Spheres":{}, "Boxes":{}, "TriangleMeshes":{}}
 
     with open(path) as file:
 
@@ -200,6 +234,7 @@ def parser(path):
         lightNumber     = 0
         sphereNumber    = 0
         boxNumber       = 0
+        meshNumber      = 0
 
         lines = file.readlines()
 
@@ -227,26 +262,6 @@ def parser(path):
                 boxNumber = parse_boxes(boxNumber, imageContents, lines, iteration)
             
             if "Triangles" in line:
-                pass #TODO
-    
+                meshNumber = parse_triangles(meshNumber, imageContents, lines, iteration)
+
     return imageContents
-
-
-
-    """"
-    Segmento Triangles
-    Este segmento descreve as propriedades de uma malha de triângulos.
-    Os parâmetros são o índice de transformação da malha, o qual se aplica a todos os triângulos; segue-
-    se, para cada triângulo da malha, o índice do material do triângulo e as coordenadas dos vértices do
-    triângulo. É assumido que o lado da frente do triângulo é aquele cujos vértices foram definidos no
-    sentido contrário ao do movimento dos ponteiros de um relógio.
-    Pode haver vários segmentos deste tipo.
-    Triangles {
-    transformação // aplica-se a todos os triângulos; índice (integer >= 0)
-    material // aplica-se a cada triângulo; índice (integer >= 0)
-    x y z // coordenadas do primeiro vértice (double)
-    x y z // coordenadas do segundo vértice (double)
-    x y z // coordenadas do terceiro vértice (double)
-    ...
-    }
-    """
