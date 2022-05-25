@@ -136,6 +136,7 @@ class Ui_MainWindow(object):
         self.x_spinBox_3.setGeometry(QtCore.QRect(50, 60, 42, 22))
         self.x_spinBox_3.setObjectName("x_spinBox_3")
         self.x_spinBox_3.setMaximum(5000)
+        self.x_spinBox_3.setMinimum(-5000)
         self.x_label_2 = QtWidgets.QLabel(self.transformation_groupBox_3)
         self.x_label_2.setGeometry(QtCore.QRect(20, 60, 25, 16))
         self.x_label_2.setObjectName("x_label_2")
@@ -146,6 +147,7 @@ class Ui_MainWindow(object):
         self.y_spinBox_4.setGeometry(QtCore.QRect(50, 90, 42, 16))
         self.y_spinBox_4.setObjectName("y_spinBox_4")
         self.y_spinBox_4.setMaximum(5000)
+        self.y_spinBox_4.setMinimum(-5000)
         self.center_label_3 = QtWidgets.QLabel(self.transformation_groupBox_3)
         self.center_label_3.setGeometry(QtCore.QRect(50, 30, 50, 16))
         self.center_label_3.setObjectName("center_label_3")
@@ -153,13 +155,15 @@ class Ui_MainWindow(object):
         self.z_spinBox_5.setGeometry(QtCore.QRect(50, 120, 42, 22))
         self.z_spinBox_5.setObjectName("z_spinBox_5")
         self.z_spinBox_5.setMaximum(5000)
+        self.z_spinBox_5.setMinimum(-5000)
         self.z_label_3 = QtWidgets.QLabel(self.transformation_groupBox_3)
         self.z_label_3.setGeometry(QtCore.QRect(20, 125, 25, 16))
         self.z_label_3.setObjectName("z_label_3")
-        self.x_spinBox_4 = QtWidgets.QSpinBox(self.transformation_groupBox_3)
-        self.x_spinBox_4.setGeometry(QtCore.QRect(190, 60, 42, 22))
-        self.x_spinBox_4.setObjectName("x_spinBox_4")
-        self.x_spinBox_4.setMaximum(5000)
+        self.cam_horiz_spinBox = QtWidgets.QSpinBox(self.transformation_groupBox_3)
+        self.cam_horiz_spinBox.setGeometry(QtCore.QRect(190, 60, 42, 22))
+        self.cam_horiz_spinBox.setObjectName("cam_horiz_spinBox")
+        self.cam_horiz_spinBox.setMaximum(5000)
+        self.cam_horiz_spinBox.setMinimum(-5000)
         self.x_label_3 = QtWidgets.QLabel(self.transformation_groupBox_3)
         self.x_label_3.setGeometry(QtCore.QRect(120, 60, 61, 16))
         self.x_label_3.setObjectName("x_label_3")
@@ -167,10 +171,11 @@ class Ui_MainWindow(object):
             self.transformation_groupBox_3)
         self.orientation_label_4.setGeometry(QtCore.QRect(170, 30, 71, 16))
         self.orientation_label_4.setObjectName("orientation_label_4")
-        self.x_spinBox_5 = QtWidgets.QSpinBox(self.transformation_groupBox_3)
-        self.x_spinBox_5.setGeometry(QtCore.QRect(190, 90, 42, 22))
-        self.x_spinBox_5.setObjectName("x_spinBox_5")
-        self.x_spinBox_5.setMaximum(5000)
+        self.cam_vert_spinBox = QtWidgets.QSpinBox(self.transformation_groupBox_3)
+        self.cam_vert_spinBox.setGeometry(QtCore.QRect(190, 90, 42, 22))
+        self.cam_vert_spinBox.setObjectName("cam_vert_spinBox")
+        self.cam_vert_spinBox.setMaximum(5000)
+        self.cam_vert_spinBox.setMinimum(-5000)
         self.x_label_4 = QtWidgets.QLabel(self.transformation_groupBox_3)
         self.x_label_4.setGeometry(QtCore.QRect(130, 90, 51, 16))
         self.x_label_4.setObjectName("x_label_4")
@@ -228,7 +233,15 @@ class Ui_MainWindow(object):
             # Camera
             self.fov_spinBox.setValue(int(float(imageContents["Cameras"][0]["FOV"])))
             self.distance_spinBox.setValue(int(float(imageContents["Cameras"][0]["Distance"])))
-            #TODO Transformation fill with camera transform values
+
+            # Camera transformation
+            self.x_spinBox_3.setValue(int(imageContents["Transformations"][ int(imageContents["Cameras"][0]["Transformation"]) ]["Translation"]["X"]))
+            self.y_spinBox_4.setValue(int(imageContents["Transformations"][ int(imageContents["Cameras"][0]["Transformation"]) ]["Translation"]["Y"]))
+            self.z_spinBox_5.setValue(int(imageContents["Transformations"][ int(imageContents["Cameras"][0]["Transformation"]) ]["Translation"]["Z"]))
+
+            self.cam_horiz_spinBox.setValue(int(imageContents["Transformations"][ int(imageContents["Cameras"][0]["Transformation"]) ]["Rotations"]["Rx"]))
+            self.cam_vert_spinBox.setValue(int(imageContents["Transformations"][ int(imageContents["Cameras"][0]["Transformation"]) ]["Rotations"]["Rz"]))
+
         except:
             self.error_message("No file selected")
 
