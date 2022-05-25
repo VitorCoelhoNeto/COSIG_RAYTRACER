@@ -32,9 +32,10 @@ def testes():
     #print(type(matrix))
     #print(type(matrix.get_matrix()))
 
-    imageContents = parser(FILE_PATH)
-    with open("temp.json", "w", encoding="utf-8") as file2:
-        file2.write(json.dumps(imageContents, indent=4, separators=(',', ':')))
+    #imageContents = parser(FILE_PATH)
+    #with open("temp.json", "w", encoding="utf-8") as file2:
+    #    file2.write(json.dumps(imageContents, indent=4, separators=(',', ':')))
+    window()
     pass
 
 

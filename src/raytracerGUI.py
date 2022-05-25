@@ -11,6 +11,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QFileDialog
 from PyQt5.QtGui import QPixmap, QIcon, QFont
+import app
 
 
 class Ui_MainWindow(object):
@@ -64,6 +65,7 @@ class Ui_MainWindow(object):
         self.distance_spinBox = QtWidgets.QSpinBox(self.camera_groupBox)
         self.distance_spinBox.setGeometry(QtCore.QRect(100, 40, 42, 22))
         self.distance_spinBox.setObjectName("distance_spinBox")
+        self.distance_spinBox.setMaximum(5000)
         self.distance_label = QtWidgets.QLabel(self.camera_groupBox)
         self.distance_label.setGeometry(QtCore.QRect(20, 40, 55, 16))
         self.distance_label.setObjectName("distance_label")
@@ -73,6 +75,7 @@ class Ui_MainWindow(object):
         self.fov_spinBox = QtWidgets.QSpinBox(self.camera_groupBox)
         self.fov_spinBox.setGeometry(QtCore.QRect(100, 90, 42, 22))
         self.fov_spinBox.setObjectName("fov_spinBox")
+        self.fov_spinBox.setMaximum(5000)
 
         # Image Group Box
         self.image_groupBox_3 = QtWidgets.QGroupBox(self.centralwidget)
@@ -84,6 +87,7 @@ class Ui_MainWindow(object):
         self.horizontal_spinBox_6 = QtWidgets.QSpinBox(self.image_groupBox_3)
         self.horizontal_spinBox_6.setGeometry(QtCore.QRect(90, 70, 42, 22))
         self.horizontal_spinBox_6.setObjectName("horizontal_spinBox_6")
+        self.horizontal_spinBox_6.setMaximum(3840)
         self.horizontal_label_5 = QtWidgets.QLabel(self.image_groupBox_3)
         self.horizontal_label_5.setGeometry(QtCore.QRect(20, 70, 61, 16))
         self.horizontal_label_5.setObjectName("horizontal_label_5")
@@ -96,6 +100,7 @@ class Ui_MainWindow(object):
         self.vertical_spinBox_7 = QtWidgets.QSpinBox(self.image_groupBox_3)
         self.vertical_spinBox_7.setGeometry(QtCore.QRect(90, 110, 42, 22))
         self.vertical_spinBox_7.setObjectName("vertical_spinBox_7")
+        self.vertical_spinBox_7.setMaximum(2160)
 
         # Renderer Group Box
         self.renderer_groupBox_4 = QtWidgets.QGroupBox(self.centralwidget)
@@ -108,6 +113,7 @@ class Ui_MainWindow(object):
             self.renderer_groupBox_4)
         self.horizontal_spinBox_8.setGeometry(QtCore.QRect(120, 70, 42, 22))
         self.horizontal_spinBox_8.setObjectName("horizontal_spinBox_8")
+        self.horizontal_spinBox_8.setMaximum(3840)
         self.recursion_label_7 = QtWidgets.QLabel(self.renderer_groupBox_4)
         self.recursion_label_7.setGeometry(QtCore.QRect(20, 70, 101, 16))
         self.recursion_label_7.setObjectName("recursion_label_7")
@@ -129,6 +135,7 @@ class Ui_MainWindow(object):
         self.x_spinBox_3 = QtWidgets.QSpinBox(self.transformation_groupBox_3)
         self.x_spinBox_3.setGeometry(QtCore.QRect(50, 60, 42, 22))
         self.x_spinBox_3.setObjectName("x_spinBox_3")
+        self.x_spinBox_3.setMaximum(5000)
         self.x_label_2 = QtWidgets.QLabel(self.transformation_groupBox_3)
         self.x_label_2.setGeometry(QtCore.QRect(20, 60, 25, 16))
         self.x_label_2.setObjectName("x_label_2")
@@ -138,18 +145,21 @@ class Ui_MainWindow(object):
         self.y_spinBox_4 = QtWidgets.QSpinBox(self.transformation_groupBox_3)
         self.y_spinBox_4.setGeometry(QtCore.QRect(50, 90, 42, 16))
         self.y_spinBox_4.setObjectName("y_spinBox_4")
+        self.y_spinBox_4.setMaximum(5000)
         self.center_label_3 = QtWidgets.QLabel(self.transformation_groupBox_3)
         self.center_label_3.setGeometry(QtCore.QRect(50, 30, 50, 16))
         self.center_label_3.setObjectName("center_label_3")
         self.z_spinBox_5 = QtWidgets.QSpinBox(self.transformation_groupBox_3)
         self.z_spinBox_5.setGeometry(QtCore.QRect(50, 120, 42, 22))
         self.z_spinBox_5.setObjectName("z_spinBox_5")
+        self.z_spinBox_5.setMaximum(5000)
         self.z_label_3 = QtWidgets.QLabel(self.transformation_groupBox_3)
         self.z_label_3.setGeometry(QtCore.QRect(20, 125, 25, 16))
         self.z_label_3.setObjectName("z_label_3")
         self.x_spinBox_4 = QtWidgets.QSpinBox(self.transformation_groupBox_3)
         self.x_spinBox_4.setGeometry(QtCore.QRect(190, 60, 42, 22))
         self.x_spinBox_4.setObjectName("x_spinBox_4")
+        self.x_spinBox_4.setMaximum(5000)
         self.x_label_3 = QtWidgets.QLabel(self.transformation_groupBox_3)
         self.x_label_3.setGeometry(QtCore.QRect(120, 60, 61, 16))
         self.x_label_3.setObjectName("x_label_3")
@@ -160,6 +170,7 @@ class Ui_MainWindow(object):
         self.x_spinBox_5 = QtWidgets.QSpinBox(self.transformation_groupBox_3)
         self.x_spinBox_5.setGeometry(QtCore.QRect(190, 90, 42, 22))
         self.x_spinBox_5.setObjectName("x_spinBox_5")
+        self.x_spinBox_5.setMaximum(5000)
         self.x_label_4 = QtWidgets.QLabel(self.transformation_groupBox_3)
         self.x_label_4.setGeometry(QtCore.QRect(130, 90, 51, 16))
         self.x_label_4.setObjectName("x_label_4")
@@ -198,24 +209,38 @@ class Ui_MainWindow(object):
 
     def load_image(self):
 
-        print("Load Button")
-        path = QFileDialog.getOpenFileName(self.load_btn, 'Open a file', '',
-                                           'All Files (*.*)')
-        if path != ('', ''):
-            print("File path : " + path[0])
-            self.start_btn.show()
-            self.save_btn.show()
-        image_path = path[0]
+        try:
+            print("Load Button")
+            path = QFileDialog.getOpenFileName(self.load_btn, 'Open a file', '',
+                                            'Scene Files (*.txt)')
+            if path != ('', ''):
+                print("File path : " + path[0])
+                self.start_btn.show()
+                self.save_btn.show()
+            image_path = path[0]
 
-        graphicsView = QtWidgets.QGraphicsView(self.image_container)
-        pix = QPixmap()
-        pix.load(str(image_path))
+            imageContents = app.parser(image_path)
 
-        item = QtWidgets.QGraphicsPixmapItem(pix)
-        scene = QtWidgets.QGraphicsScene(self.image_container)
-        scene.addItem(item)
-        self.image_container.setScene(scene)
-        self.image_container.show()
+            # Image
+            self.horizontal_spinBox_6.setValue(int(imageContents["Images"][0]["Resolution"]["X"]))
+            self.vertical_spinBox_7.setValue(int(imageContents["Images"][0]["Resolution"]["Y"]))
+
+            # Camera
+            self.fov_spinBox.setValue(int(float(imageContents["Cameras"][0]["FOV"])))
+            self.distance_spinBox.setValue(int(float(imageContents["Cameras"][0]["Distance"])))
+            #TODO Transformation fill with camera transform values
+        except:
+            self.error_message("No file selected")
+
+        # Não apagues que ainda pode vir a dar jeito
+        #graphicsView = QtWidgets.QGraphicsView(self.image_container)
+        #pix = QPixmap()
+        #pix.load(str(image_path))
+        #item = QtWidgets.QGraphicsPixmapItem(pix)
+        #scene = QtWidgets.QGraphicsScene(self.image_container)
+        #scene.addItem(item)
+        #self.image_container.setScene(scene)
+        #self.image_container.show()
 
     def error_message(self, message):
         """
