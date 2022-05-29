@@ -4,7 +4,6 @@ UI:
     -Done
 
 Classes:
-    -Rest of the Vector3 methods (and maybe Vector4?)
     -Vector 4 conversion to Vector3 (Homegeneous to Cartesian coordinates)
     -Transformation methods
     -Review triangle and triangle mesh objects

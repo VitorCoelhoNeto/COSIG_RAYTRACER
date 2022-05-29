@@ -1,3 +1,5 @@
+import numpy as np
+
 class Color3:
     """
     Class that represents colors in RGB format
@@ -36,21 +38,74 @@ class Vector3:
     def print_coordinates(self):
         print(self.x, self.y, self.z)
 
-    def sum_vectors(vec1,vec2):
-        x = (vec1.x + vec2.x)
-        y = (vec1.y + vec2.y)
-        z = (vec1.z + vec2.z)
+    # Deprecated
+    #def sum_vectors(vec1,vec2):
+    #    x = (vec1.x + vec2.x)
+    #    y = (vec1.y + vec2.y)
+    #    z = (vec1.z + vec2.z)
+    #
+    #    vec_result=Vector3(x, y, z)
+    #    return vec_result
+    #
+    #def subtract_vectors(vec1,vec2):
+    #    x = (vec1.x - vec2.x)
+    #    y = (vec1.y - vec2.y)
+    #    z = (vec1.z - vec2.z)
+    #
+    #    vec_result=Vector3(x, y, z)
+    #    return vec_result
 
-        vec_result=Vector3(x, y, z)
-        return vec_result
+    def normalize_vector(self):
+        """
+        Normalizes a vector.
+        :param Vector3 self: Vector to be normalized
+        :returns: self
+        :rtype: Vector3
+        """
+        mainArray = [self.x, self.y, self.z]
+        return np.array(mainArray) / np.sqrt(np.sum(np.array(mainArray)**2)) #normalized x = x/sqrt(x^2 + y^2 + z^2) and the same goes for y and z
 
-    def subtract_vectors(vec1,vec2):
-        x = (vec1.x - vec2.x)
-        y = (vec1.y - vec2.y)
-        z = (vec1.z - vec2.z)
+    def calculate_distance(self):
+        """
+        Calculates the distance of a vector.
+        :returns: float
+        :rtype: float
+        """
+        return np.sqrt(pow(self.x, 2) + pow(self.y, 2) + pow(self.z, 2))
 
-        vec_result=Vector3(x, y, z)
-        return vec_result
+    def calculate_scalar_product(self, vector2):
+        """
+        Calculates the dot product of two vectors.
+        :param Vector3 vector2: Vector to be calculated with the original vector.
+        :returns: float
+        :rtype: float
+        """
+        mainArray = [self.x, self.y, self.z]
+        secondArray = [vector2.x, vector2.y, vector2.z]
+        return np.dot(np.array(mainArray), np.array(secondArray))
+
+    def calculate_vectorial_product(self, vector2):
+        """
+        Calculates the cross product of two vectors.
+        :param Vector3 vector2: Vector to be calculated with the original vector.
+        :returns: float
+        :rtype: float
+        """
+        mainArray = [self.x, self.y, self.z]
+        secondArray = [vector2.x, vector2.y, vector2.z]
+        return np.cross(np.array(mainArray), np.array(secondArray))
+
+
+    def calculate_distance_two(self, vector2):
+        """
+        Calculates the distance between two vectors.
+        :param Vector3 vector2: Other vector from which the distance is going to be calculated, starting in self.
+        :returns: float
+        :rtype: float
+        """
+        if not isinstance(vector2, Vector3):
+            raise TypeError("vector2 needs to be of type Vector3")
+        return np.sqrt(pow((vector2.x - self.x), 2) + pow((vector2.y - self.y), 2) + pow((vector2.z - self.z), 2))
     
     def __add__(self, vec3):
         """
@@ -71,6 +126,16 @@ class Vector3:
         """
         if isinstance(t, float) or isinstance(t, int):
             return Vector3(self.x * t, self.y * t, self.z * t)
+        
+    def __sub__(self, vec3):
+        """
+        Overload of the '-' operation
+        :param Vector3 vec3: Vector to be added to the original one
+        :return: Vector3(self.x + vec3.x, self.y + vec3.y, self.z + vec3.z)
+        :rtype: Vector3
+        """
+        if isinstance(vec3, Vector3):
+            return Vector3(self.x - vec3.x, self.y - vec3.y, self.z - vec3.z)
 
 
 
