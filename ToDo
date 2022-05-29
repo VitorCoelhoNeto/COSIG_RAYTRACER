@@ -1,7 +1,26 @@
 12-05-2022 -> 18-05-2022
 
+UI:
+    -Done
+
 Classes:
     -Rest of the Vector3 methods (and maybe Vector4?)
     -Vector 4 conversion to Vector3 (Homegeneous to Cartesian coordinates)
     -Transformation methods
+    -Review triangle and triangle mesh objects
     -Review
+
+Parser:
+    -Done
+
+Normal Calculation:
+    -???
+
+
+
+18-05-2022 -> 24-05-2022
+
+
+
+
+25-05-2022 -> 31-05-2022

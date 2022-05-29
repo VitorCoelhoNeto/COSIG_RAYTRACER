@@ -10,16 +10,17 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QFileDialog
-from PyQt5.QtGui import QPixmap, QIcon, QFont
 import app
 
 
 class Ui_MainWindow(object):
+
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(1900, 900)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
+        self.centralwidget.showMaximized()
 
         # Image container
         self.image_container = QtWidgets.QGraphicsView(self.centralwidget)
@@ -212,10 +213,10 @@ class Ui_MainWindow(object):
             _translate("MainWindow", "Recursion Depth"))
         self.start_btn_2.setText(_translate("MainWindow", "Start"))
 
+
     def load_image(self):
 
         try:
-            print("Load Button")
             path = QFileDialog.getOpenFileName(self.load_btn, 'Open a file', '',
                                             'Scene Files (*.txt)')
             if path != ('', ''):
@@ -224,8 +225,9 @@ class Ui_MainWindow(object):
                 self.save_btn.show()
             image_path = path[0]
 
+            # Parse the loaded file and fill spin boxes
             imageContents = app.parser(image_path)
-
+            
             # Image
             self.horizontal_spinBox_6.setValue(int(imageContents["Images"][0]["Resolution"]["X"]))
             self.vertical_spinBox_7.setValue(int(imageContents["Images"][0]["Resolution"]["Y"]))
@@ -255,26 +257,16 @@ class Ui_MainWindow(object):
         #self.image_container.setScene(scene)
         #self.image_container.show()
 
+
     def error_message(self, message):
         """
         Displays error message.
         :param lib_main_window.Ui_MainWindow self: The UI itself
         :param str message: Message to be displayed
         """
-
         msg = QtWidgets.QMessageBox()
         msg.setWindowIcon(QtGui.QIcon('imgs\\error.png'))
         msg.setIcon(QtWidgets.QMessageBox.Critical)
         msg.setText(message)
         msg.setWindowTitle("Error")
         msg.exec_()
-
-
-if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
-    MainWindow.show()
-    sys.exit(app.exec_())

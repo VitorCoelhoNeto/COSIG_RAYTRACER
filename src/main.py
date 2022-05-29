@@ -35,7 +35,6 @@ def testes():
     imageContents = parser(FILE_PATH)
     with open("temp.json", "w", encoding="utf-8") as file2:
         file2.write(json.dumps(imageContents, indent=4, separators=(',', ':')))
-    #window()
     pass
 
 
@@ -44,5 +43,5 @@ if __name__ == "__main__":
     """
     Main function
     """
-    #window()
+    window()
     testes()

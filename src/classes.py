@@ -162,39 +162,145 @@ class Transformation:
 
 
 class Image:
-    pass
+    """
+    Image class that contains image properties, namely, resolution and background color.
+    :param int resolutionX: Image resolution on the X axis (horizontal resolution).
+    :param int resolutionY: Image resolution on the Y axis (vertical resolution).
+    :param Color3 backColor: Background color primary components (R, G and B).
+    """
+    def __init__(self, backColor, resolutionX, resolutionY):
+        if not isinstance(backColor, Color3):
+            raise TypeError("Wrong color type. Needs to be of type Color3")
+        if not isinstance(resolutionX, int) or not isinstance(resolutionY, int):
+            raise TypeError("Wrong resolution. 2 integers are required")
+        self.resolutionX = resolutionX
+        self.resolutionY = resolutionY
+        self.backColor = backColor
 
 
 
 class Camera:
-    pass
+    """
+    Image class that contains camera properties, namely, transformation, distance and field of view (FOV).
+    :param Transformation transformation: Transformation index associated with the camera's transformation.
+    :param float distance: Distance to the projection plane (the plane Z = 0.0).
+    :param float fov: Vertical field of view in degrees.
+    """
+    def __init__(self, transformation, distance, fov):
+        if not isinstance(transformation, Transformation):
+            raise TypeError("Transformation needs to be of type Transformation")
+        if not isinstance(distance, float):
+            raise TypeError("Distance needs to be of type float")
+        if not isinstance(fov, float):
+            raise TypeError("Field of view needs to be of type float")
+        self.transformation = transformation
+        self.distance = distance
+        self.fov = fov
 
 
 
 class Light:
-    pass
+    """
+    Light class that contains light source properties, namely, transformation and color.
+    :param Transformation transformation: Transformation index associated with the light's transformation.
+    :param Color3 color: Light color.
+    """
+    def __init__(self, transformation, color):
+        if not isinstance(transformation, Transformation):
+            raise TypeError("Transformation needs to be of type Transformation")
+        if not isinstance(color, Color3):
+            raise TypeError("Color needs to be of type Color3")
+        self.transformation = transformation
+        self.color = color
 
 
 
 class Material:
-    pass
+    """
+    Represents materials that will be applied to Object3D objects.
+    :param Color3 color: Material color.
+    :param float ambient: Material ambient coefficient (0.0 <= ambient <= 1.0).
+    :param float diffuse: Material diffuse coefficient (0.0 <= diffuse <= 1.0).
+    :param float specular: Material specular coefficient (0.0 <= specular <= 1.0).
+    :param float refraction: Material refraction coefficient (0.0 <= refraction <= 1.0).
+    :param float refractionIndex: Material refraction index (1.0 <= refractionIndex).
+    """
+    def __init__(self, color, ambient, diffuse, specular, refraction, refractionIndex):
+        if not isinstance(color, Color3):
+            raise TypeError("Color needs to be of type Color3")
+        if not isinstance(ambient, float) or ambient < 0.0 or ambient > 1.0:
+            raise TypeError("Ambient coefficient needs to be of type float (0.0 <= ambient <= 1.0")
+        if not isinstance(diffuse, float) or diffuse < 0.0 or diffuse > 1.0:
+            raise TypeError("Diffuse coefficient needs to be of type float (0.0 <= diffuse <= 1.0")
+        if not isinstance(specular, float) or specular < 0.0 or specular > 1.0:
+            raise TypeError("Specular coefficient needs to be of type float (0.0 <= specular <= 1.0")
+        if not isinstance(refraction, float) or refraction < 0.0 or refraction > 1.0:
+            raise TypeError("Refraction coefficient needs to be of type float (0.0 <= refraction <= 1.0")
+        if not isinstance(refractionIndex, float) or refractionIndex < 1.0:
+            raise TypeError("RefractionIndex needs to be of type float (1.0 <= refractionIndex")
+        self.color = color
+        self.ambient = ambient
+        self.diffuse = diffuse
+        self.specular = specular
+        self.refraction = refraction
+        self.refractionIndex = refractionIndex
 
 
 
 class Object3D:
-    pass
+    """
+    Base class for 3D objects (Spheres, Boxes and Triangles).
+    :param Transformation transformation: Applied object transformation
+    :param Material material: Object material
+    """
+    def __init__(self, transformation, material):
+        if not isinstance(transformation, Transformation):
+            raise TypeError("Wrong transformation type")
+        if not isinstance(material, Material):
+            raise TypeError("Wrong material type")
+        self.transformation = transformation
+        self.material = material
 
 
 
 class Triangle(Object3D):
-    pass
+    """
+    Represents a triangle 3D object. Inherits from base super class "Object3D"
+    :param Transformation transformation: Applied object transformation
+    :param Material material: Object material
+    """
+    def __init__(self, transformation, material):
+        super().__init__(transformation, material)
+
+
+
+class TrianglesMesh(Object3D):
+    """
+    Represents a triangle mesh 3D object. Inherits from base super class "Object3D"
+    :param Transformation transformation: Applied object transformation
+    :param Material material: Object material
+    """
+    def __init__(self, transformation, material):
+        super().__init__(transformation, material)
 
 
 
 class Box(Object3D):
-    pass
+    """
+    Represents a box 3D object. Inherits from base super class "Object3D"
+    :param Transformation transformation: Applied object transformation
+    :param Material material: Object material
+    """
+    def __init__(self, transformation, material):
+        super().__init__(transformation, material)
 
 
 
 class Sphere(Object3D):
-    pass
+    """
+    Represents a Sphere 3D object. Inherits from base super class "Object3D"
+    :param Transformation transformation: Applied object transformation
+    :param Material material: Object material
+    """
+    def __init__(self, transformation, material):
+        super().__init__(transformation, material)
