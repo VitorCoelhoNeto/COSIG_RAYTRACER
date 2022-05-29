@@ -334,8 +334,50 @@ class Triangle(Object3D):
     :param Transformation transformation: Applied object transformation
     :param Material material: Object material
     """
-    def __init__(self, transformation, material):
+    def __init__(self, transformation, material, vertex1, vertex2, vertex3):
         super().__init__(transformation, material)
+        if not isinstance(vertex1, Vector3):
+            raise TypeError("Vertices must be of type Vector3")
+        self.vertex1 = vertex1
+        self.vertex2 = vertex2
+        self.vertex3 = vertex3
+    
+    def print_vertices(self):
+        """
+        Prints triangle's vertices coordinates.
+        """
+        print("Vertex 1: ", self.vertex1.x, self.vertex1.y, self.vertex1.z)
+        print("Vertex 2: ", self.vertex2.x, self.vertex2.y, self.vertex2.z)
+        print("Vertex 3: ", self.vertex3.x, self.vertex3.y, self.vertex3.z)
+    
+    def print_material_properties(self):
+        """
+        Prints material properties.
+        """
+        print("Material color: Red:", self.material.color.red, " Green:", self.material.color.green, " Blue:",  self.material.color.blue)
+        print("Material properties: Ambient:", self.material.ambient, 
+              " Diffuse:", self.material.diffuse, 
+              " Specular:", self.material.specular,
+              " Refraction:", self.material.refraction, 
+              " Refraction Index:", self.material.refractionIndex)
+    
+    def print_transformation(self):
+        """
+        Prints triangle's transformation
+        """
+        print("TODO")
+
+    def calculate_normal(self):
+        """
+        Calculates triangle normal vector.
+        :returns:
+        :rtype: Vector3
+        """
+        edgeAB = self.vertex1 - self.vertex2
+        edgeBC = self.vertex2 - self.vertex3
+        normal = edgeAB.calculate_vectorial_product(edgeBC)
+        tempVec = Vector3(float(normal[0]), float(normal[1]), float(normal[2]))
+        return tempVec.normalize_vector()
 
 
 

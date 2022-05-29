@@ -4,16 +4,15 @@ UI:
     -Done
 
 Classes:
-    -Vector 4 conversion to Vector3 (Homegeneous to Cartesian coordinates)
+    -Vector 4 conversion to Vector3 (Homegeneous to Cartesian coordinates) and vice versa
     -Transformation methods
-    -Review triangle and triangle mesh objects
-    -Review
+    -Review EVERYTHING
 
 Parser:
     -Done
 
 Normal Calculation:
-    -???
+    -Done
 
 
 

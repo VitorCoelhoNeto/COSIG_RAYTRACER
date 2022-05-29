@@ -265,3 +265,38 @@ def parser(path):
                 meshNumber = parse_triangles(meshNumber, imageContents, lines, iteration)
 
     return imageContents
+
+
+
+def normal_calculation(imageContents, mesh):
+    """
+    Calculates triangle normals.
+    :param dict imageContents: Dictionary containing objects' properties
+    :param int mesh: Mesh index (0 is the floor, 1 is the pyramid and 2 is the donut)
+    :returns: normalDict
+    :rtype: dict
+    """
+    triangleList = []
+
+    for key, triangle in imageContents["TriangleMeshes"][mesh]["Triangles"].items():
+        transformation = Transformation([[1,1,1,1], [1,1,1,1], [1,1,1,1], [1,1,1,1]])
+        material = Material(Color3(1.0, 1.0, 1.0), 0.5, 0.5, 0.5, 0.5, 1.5)
+        material = Material(Color3(     float(imageContents["Materials"][float(triangle["Material"])]["Color"]["Red"]),
+                                        float(imageContents["Materials"][float(triangle["Material"])]["Color"]["Green"]),
+                                        float(imageContents["Materials"][float(triangle["Material"])]["Color"]["Blue"])),
+                                        float(imageContents["Materials"][float(triangle["Material"])]["Properties"]["Ambient"]),
+                                        float(imageContents["Materials"][float(triangle["Material"])]["Properties"]["Diffuse"]),
+                                        float(imageContents["Materials"][float(triangle["Material"])]["Properties"]["Specular"]), 
+                                        float(imageContents["Materials"][float(triangle["Material"])]["Properties"]["Refraction"]), 
+                                        float(imageContents["Materials"][float(triangle["Material"])]["Properties"]["Refraction_Index"]))
+        vec1 = Vector3(float(triangle["(0,0)"]), float(triangle["(0,1)"]), float(triangle["(0,2)"]))
+        vec2 = Vector3(float(triangle["(1,0)"]), float(triangle["(1,1)"]), float(triangle["(1,2)"]))
+        vec3 = Vector3(float(triangle["(2,0)"]), float(triangle["(2,1)"]), float(triangle["(2,2)"]))
+        triangleList.append(Triangle(transformation, material, vec1, vec2, vec3))
+
+    normalDict = {}
+    for iteration, triangle in enumerate(triangleList):
+        triangleNormal = triangle.calculate_normal()
+        #print(triangle.print_transformation())
+        normalDict[iteration] = triangleNormal
+    return normalDict
