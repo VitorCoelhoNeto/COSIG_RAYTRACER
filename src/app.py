@@ -280,7 +280,7 @@ def normal_calculation(imageContents, mesh):
 
     for key, triangle in imageContents["TriangleMeshes"][mesh]["Triangles"].items():
         transformation = Transformation([[1,1,1,1], [1,1,1,1], [1,1,1,1], [1,1,1,1]])
-        material = Material(Color3(1.0, 1.0, 1.0), 0.5, 0.5, 0.5, 0.5, 1.5)
+        #material = Material(Color3(1.0, 1.0, 1.0), 0.5, 0.5, 0.5, 0.5, 1.5)
         material = Material(Color3(     float(imageContents["Materials"][float(triangle["Material"])]["Color"]["Red"]),
                                         float(imageContents["Materials"][float(triangle["Material"])]["Color"]["Green"]),
                                         float(imageContents["Materials"][float(triangle["Material"])]["Color"]["Blue"])),
