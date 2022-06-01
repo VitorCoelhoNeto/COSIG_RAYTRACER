@@ -254,7 +254,8 @@ class Transformation:
         matrix = np.array(self.matrix)
         matrix2 = np.array([[1, 0, 0, x], [0, 1, 0, y], [0, 0, 1, z], [0, 0, 0, 1]])
         self.matrix = list(matrix.dot(matrix2))
-        return list(matrix.dot(matrix2))
+        self.matrix = matrix@matrix2
+        return matrix@matrix2
 
 
     def rotateX(self, angle: float): #TODO Find a workaround to get the exact values of the sines and cosines
@@ -270,8 +271,8 @@ class Transformation:
             [0, np.sin(np.radians(angle)), np.cos(np.radians(angle)),    0], 
             [0, 0,                         0,                            1]
             ])
-        self.matrix = list(matrix.dot(matrix2))
-        return list(matrix.dot(matrix2))
+        self.matrix = matrix@matrix2
+        return matrix@matrix2
     
 
     def rotateY(self, angle: float):
@@ -287,8 +288,8 @@ class Transformation:
             [-(np.sin(np.radians(angle))), 0, np.cos(np.radians(angle)), 0], 
             [0,                            0, 0,                         1]
             ])
-        self.matrix = list(matrix.dot(matrix2))
-        return list(matrix.dot(matrix2))
+        self.matrix = matrix@matrix2
+        return matrix@matrix2
 
 
     def rotateZ(self, angle: float):
@@ -304,9 +305,34 @@ class Transformation:
             [0,                         0,                            1, 0], 
             [0,                         0,                            0, 1]
             ])
-        self.matrix = list(matrix.dot(matrix2))
-        return list(matrix.dot(matrix2))
+        self.matrix = matrix@matrix2
+        return matrix@matrix2
     
+
+    def scale(self, x: float, y: float, z: float):
+        """
+        :param float x: x scale value.
+        :param float y: y scale value.
+        :param float z: z scale value.
+        :returns: the matrix with the new values after the scale.
+        :rtype: list
+        """
+        matrix = np.array(self.matrix)
+        matrix2 = np.array([[x, 0, 0, 0], [0, y, 0, 0], [0, 0, z, 0], [0, 0, 0, 1]])
+        self.matrix = matrix@matrix2
+        return matrix@matrix2
+    
+
+    def transpose_matrix(self):
+        """
+        Returns a transposed version of the matrix. (DOES NOT AFFECT THE MATRIX ITSELF)
+        """
+        return np.array(self.matrix).transpose()
+    
+
+    def inverse_matrix(self): #TODO
+        pass
+
 
 
 class Image:

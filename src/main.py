@@ -55,8 +55,10 @@ def testes():
     
     testTransform = Transformation()
     testTransform.translate(2, 1, 3)
-    testTransform.rotateX(90)
+    #testTransform.rotateX(90)
+    testTransform.scale(2,3,2)
     print(testTransform.get_matrix())
+    #print(testTransform.transpose_matrix())
     #testTransform.print_matrix_items()
     pass
 
