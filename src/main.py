@@ -1,4 +1,5 @@
 from app import *
+import math
 
 FILE_PATH = "..\\test_scene_1.txt"
 
@@ -51,7 +52,12 @@ def testes():
     #normalDict = normal_calculation(imageContents, 1)
     #print(normalDict[2][0])
     #print(normalDict)
-        
+    
+    testTransform = Transformation()
+    testTransform.translate(2, 1, 3)
+    testTransform.rotateX(90)
+    print(testTransform.get_matrix())
+    #testTransform.print_matrix_items()
     pass
 
 

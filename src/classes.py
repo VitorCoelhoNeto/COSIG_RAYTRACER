@@ -1,3 +1,4 @@
+from re import A
 import numpy as np
 
 class Color3:
@@ -207,23 +208,105 @@ class Hit:
 
 class Transformation:
 
-    def __init__(self, matrix):
-        if not isinstance(matrix, list):
-            raise TypeError("Wrong matrix data type, needs to be a list of lists")
-        if not len(matrix) == 4:
-            raise TypeError("Wrong matrix, needs to be a 4x4 dimension matrix (list)")
-        for row in matrix:
-            if not isinstance(row, list) or len(row) != 4:
-                raise TypeError("Wrong matrix, needs to be a 4x4 dimension matrix (list)")
-        for row in matrix:
-            for column in row:
-                if not isinstance(column, int) and not isinstance(column, float):
-                    raise TypeError("Wrong matrix, values need to be of type int or float")
-        self.matrix = matrix
-    
+    # Deprecated
+    #def __init__(self, matrix):
+    #    if not isinstance(matrix, list):
+    #        raise TypeError("Wrong matrix data type, needs to be a list of lists")
+    #    if not len(matrix) == 4:
+    #        raise TypeError("Wrong matrix, needs to be a 4x4 dimension matrix (list)")
+    #    for row in matrix:
+    #        if not isinstance(row, list) or len(row) != 4:
+    #            raise TypeError("Wrong matrix, needs to be a 4x4 dimension matrix (list)")
+    #    for row in matrix:
+    #        for column in row:
+    #            if not isinstance(column, int) and not isinstance(column, float):
+    #                raise TypeError("Wrong matrix, values need to be of type int or float")
+    #    self.matrix = matrix
+
+    def __init__(self):
+        self.matrix = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
+
+
     def get_matrix(self):
+        """
+        Returns the matrix associated with the object.
+        """
         return self.matrix
 
+    
+    def print_matrix_items(self):
+        """
+        Helper function that prints the current status of the matrix, value by value (from left to right, top to bottom).
+        """
+        for row in self.matrix:
+            for column in row:
+                print(column)
+
+
+    def translate(self, x: float, y: float, z: float):
+        """
+        :param float x: x translation value.
+        :param float y: y translation value.
+        :param float z: z translation value.
+        :returns: the matrix with the new values after the translation.
+        :rtype: list
+        """
+        matrix = np.array(self.matrix)
+        matrix2 = np.array([[1, 0, 0, x], [0, 1, 0, y], [0, 0, 1, z], [0, 0, 0, 1]])
+        self.matrix = list(matrix.dot(matrix2))
+        return list(matrix.dot(matrix2))
+
+
+    def rotateX(self, angle: float): #TODO Find a workaround to get the exact values of the sines and cosines
+        """
+        :param float angle: rotation angle in degrees (function converts to radians).
+        :returns: the matrix with the new values after the rotation.
+        :rtype: list
+        """
+        matrix = np.array(self.matrix)
+        matrix2 = np.array([
+            [1, 0,                         0,                            0], 
+            [0, np.cos(np.radians(angle)), -(np.sin(np.radians(angle))), 0], 
+            [0, np.sin(np.radians(angle)), np.cos(np.radians(angle)),    0], 
+            [0, 0,                         0,                            1]
+            ])
+        self.matrix = list(matrix.dot(matrix2))
+        return list(matrix.dot(matrix2))
+    
+
+    def rotateY(self, angle: float):
+        """
+        :param float angle: rotation angle in degrees (function converts to radians).
+        :returns: the matrix with the new values after the rotation.
+        :rtype: list
+        """
+        matrix = np.array(self.matrix)
+        matrix2 = np.array([
+            [np.cos(np.radians(angle)),    0, np.sin(np.radians(angle)), 0], 
+            [0,                            1, 0,                         0], 
+            [-(np.sin(np.radians(angle))), 0, np.cos(np.radians(angle)), 0], 
+            [0,                            0, 0,                         1]
+            ])
+        self.matrix = list(matrix.dot(matrix2))
+        return list(matrix.dot(matrix2))
+
+
+    def rotateZ(self, angle: float):
+        """
+        :param float angle: rotation angle in degrees (function converts to radians).
+        :returns: the matrix with the new values after the rotation.
+        :rtype: list
+        """
+        matrix = np.array(self.matrix)
+        matrix2 = np.array([
+            [np.cos(np.radians(angle)), -(np.sin(np.radians(angle))), 0, 0], 
+            [np.sin(np.radians(angle)), np.cos(np.radians(angle)),    0, 0], 
+            [0,                         0,                            1, 0], 
+            [0,                         0,                            0, 1]
+            ])
+        self.matrix = list(matrix.dot(matrix2))
+        return list(matrix.dot(matrix2))
+    
 
 
 class Image:
@@ -365,7 +448,7 @@ class Triangle(Object3D):
         """
         Prints triangle's transformation
         """
-        print("TODO")
+        print(self.transformation.print_matrix_items())
 
     def calculate_normal(self):
         """

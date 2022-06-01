@@ -5,7 +5,6 @@ UI:
 
 Classes:
     -Vector 4 conversion to Vector3 (Homegeneous to Cartesian coordinates) and vice versa
-    -Transformation methods
     -Review EVERYTHING
 
 Parser:
