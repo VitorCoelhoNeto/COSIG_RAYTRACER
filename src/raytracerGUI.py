@@ -227,6 +227,10 @@ class Ui_MainWindow(object):
 
             # Parse the loaded file and fill spin boxes
             imageContents = app.parser(image_path)
+
+            # Calculations for the ray paths
+            sceneObjects = app.generate_scene_objects(imageContents)
+            pixelList = app.preliminar_calculations(sceneObjects[0], sceneObjects[1])
             
             # Image
             self.horizontal_spinBox_6.setValue(int(imageContents["Images"][0]["Resolution"]["X"]))

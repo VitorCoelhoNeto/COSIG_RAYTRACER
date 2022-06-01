@@ -1,5 +1,4 @@
 from app import *
-import math
 
 FILE_PATH = "..\\test_scene_1.txt"
 
@@ -44,7 +43,7 @@ def testes():
     #print(type(matrix.get_matrix()))
 
     # Test parsing the items
-    #imageContents = parser(FILE_PATH)
+    imageContents = parser(FILE_PATH)
     #with open("temp.json", "w", encoding="utf-8") as file2:
     #    file2.write(json.dumps(imageContents, indent=4, separators=(',', ':')))
 
@@ -53,13 +52,16 @@ def testes():
     #print(normalDict[2][0])
     #print(normalDict)
     
-    testTransform = Transformation()
-    testTransform.translate(2, 1, 3)
+    #testTransform = Transformation()
+    #testTransform.translate(2, 1, 3)
     #testTransform.rotateX(90)
-    testTransform.scale(2,3,2)
-    print(testTransform.get_matrix())
+    #testTransform.scale(2,3,2)
+    #print(testTransform.get_matrix())
     #print(testTransform.transpose_matrix())
     #testTransform.print_matrix_items()
+
+    sceneObjects = generate_scene_objects(imageContents)
+    pixelList = preliminar_calculations(sceneObjects[0], sceneObjects[1])
     pass
 
 

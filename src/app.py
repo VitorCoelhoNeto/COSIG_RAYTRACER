@@ -280,7 +280,6 @@ def normal_calculation(imageContents, mesh):
 
     for key, triangle in imageContents["TriangleMeshes"][mesh]["Triangles"].items():
         transformation = Transformation([[1,1,1,1], [1,1,1,1], [1,1,1,1], [1,1,1,1]])
-        #material = Material(Color3(1.0, 1.0, 1.0), 0.5, 0.5, 0.5, 0.5, 1.5)
         material = Material(Color3(     float(imageContents["Materials"][float(triangle["Material"])]["Color"]["Red"]),
                                         float(imageContents["Materials"][float(triangle["Material"])]["Color"]["Green"]),
                                         float(imageContents["Materials"][float(triangle["Material"])]["Color"]["Blue"])),
@@ -300,3 +299,93 @@ def normal_calculation(imageContents, mesh):
         #print(triangle.print_transformation())
         normalDict[iteration] = triangleNormal
     return normalDict
+
+
+
+def generate_scene_objects(imageContents: dict) -> list:
+    """
+    Generates the objects present on the scene
+    :param dict imageContents: Dictionary containing objects' properties
+    :returns: List with scene objects -> sceneObjects
+    :rtype: list
+    """
+    sceneObjects = list()
+
+    # Camera
+    camTransformation = Transformation()
+    camTranslation = imageContents["Transformations"][int(imageContents["Cameras"][0]["Transformation"])]["Translation"]
+    camTransformation.translate(float(camTranslation["X"]), float(camTranslation["Y"]), float(camTranslation["Z"]))
+    camTransformation.rotateX(float(imageContents["Transformations"][int(imageContents["Cameras"][0]["Transformation"])]["Rotations"]["Rx"]))
+    camTransformation.rotateZ(float(imageContents["Transformations"][int(imageContents["Cameras"][0]["Transformation"])]["Rotations"]["Rz"]))
+    camDistance = float(imageContents["Cameras"][0]["Distance"])
+    camFOV = float(imageContents["Cameras"][0]["FOV"])
+    camera = Camera(camTransformation, camDistance, camFOV)
+    sceneObjects.append(camera)
+
+    # Image
+    imageColor = Color3(float(imageContents["Images"][0]["BG_Color"]["Red"]), 
+                        float(imageContents["Images"][0]["BG_Color"]["Green"]), 
+                        float(imageContents["Images"][0]["BG_Color"]["Blue"]))
+    image = Image(imageColor, int(imageContents["Images"][0]["Resolution"]["X"]), int(imageContents["Images"][0]["Resolution"]["Y"]))
+    sceneObjects.append(image)
+
+    return sceneObjects
+
+
+
+def trace_rays(ray: Ray, rec: int) -> Color3:
+    """
+    Traces the rays, recursively following the path the ray takes and returns a color.
+    :param Ray ray: Ray to be traced.
+    :param int rec: Recursivity level.
+    :returns: A Color3 object
+    :rtype: Color3
+    """
+    return Color3(0.4, 0.5, 0.6)
+
+
+
+def preliminar_calculations(camera: Camera, image: Image) -> list:
+    """
+    Preliminar calculations
+    :param Camera camera: Scene's camera object.
+    :param Image image: Scene's image object.
+    :returns: pixelList, a list of colors of each pixel
+    :rtype: list
+    """
+    camFOV = camera.fov
+    camDistance = camera.distance.z
+
+    # Convert FOV to radians (originally it's 30 degrees)
+    radianCamFOV = (camFOV * np.pi) / 180.0
+
+    # Calculate pixel size (Image is square 200x200)
+    height = 2.0 * camDistance * np.tan(radianCamFOV / 2.0)
+    width = height * image.resolutionX / image.resolutionY
+    pixelSize = width / image.resolutionY
+
+    # Primary rays
+    origin  = Vector3(0, 0, camDistance)
+
+    pixelList = list()
+
+    file = open("temp.txt", "a", encoding="utf-8")
+
+    for j in range(image.resolutionY + 1):
+        for i in range(image.resolutionX + 1):
+            pixelX = (i + 0.5) * pixelSize - width / 2.0
+            pixelY = -(j + 0.5) * pixelSize + height / 2.0
+            pixelZ = 0
+            direction = Vector3(float(pixelX), float(pixelY), -float(camDistance))
+            direction = direction.normalize_vector()
+            directionVector = Vector3(float(direction[0]), float(direction[1]), float(direction[2]))
+            ray = Ray(origin, directionVector)
+            rec = 2
+            color = trace_rays(ray, rec)
+            color.check_range()
+            file.write(str(directionVector.x) + "   "+ str(directionVector.y) + "   "+ str(directionVector.z) + "\n")
+    
+            pixelList.append(Color3(float(int(255.0 * color.red)), float(int(255.0 * color.green)), float(int(255.0 * color.blue))))
+
+    file.close()
+    return pixelList

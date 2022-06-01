@@ -1,6 +1,5 @@
-from re import A
+#from this import d
 import numpy as np
-
 
 class Color3:
     """
@@ -14,14 +13,35 @@ class Color3:
         if not isinstance(red, float) or type(green) != float or type(blue) != float:
             raise TypeError(
                 "Color values must be of float type between 0.0 and 1.0")
-        if red < 0.0 or red > 1.0 or green < 0.0 or green > 1.0 or blue < 0.0 or blue > 1.0:
-            raise TypeError("Color values must be between 0.0 and 1.0")
+        # Deprecated
+        #if red < 0.0 or red > 1.0 or green < 0.0 or green > 1.0 or blue < 0.0 or blue > 1.0:
+        #    raise TypeError("Color values must be between 0.0 and 1.0")
         self.red = red
         self.green = green
         self.blue = blue
 
+
     def print_colors(self):
         print(self.red, self.green, self.blue)
+    
+    
+    def check_range(self):
+        """
+        Checks the range of the color elements and limits their value
+        """
+        if self.red > 1.0:
+            self.red = 1.0
+        if self.green > 1.0:
+            self.green = 1.0
+        if self.blue > 1.0:
+            self.blue = 1.0
+        if self.red < 0.0:
+            self.red = 0.0
+        if self.green < 0.0:
+            self.green = 0.0
+        if self.blue < 0.0:
+            self.blue = 0.0
+
 
 
 class Vector3:
@@ -289,9 +309,9 @@ class Transformation:
         matrix = np.array(self.matrix)
         matrix2 = np.array([[1, 0, 0, x], [0, 1, 0, y],
                            [0, 0, 1, z], [0, 0, 0, 1]])
-        self.matrix = list(matrix.dot(matrix2))
+        #self.matrix = list(matrix.dot(matrix2))
         self.matrix = matrix@matrix2
-        return matrix@matrix2
+        return matrix@matrix2 
 
     # TODO Find a workaround to get the exact values of the sines and cosines
     def rotateX(self, angle: float):
@@ -401,7 +421,7 @@ class Camera:
         if not isinstance(fov, float):
             raise TypeError("Field of view needs to be of type float")
         self.transformation = transformation
-        self.distance = distance
+        self.distance = Vector3(0, 0, distance)
         self.fov = fov
 
 

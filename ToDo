@@ -4,7 +4,6 @@ UI:
     -Done
 
 Classes:
-    -Vector 4 conversion to Vector3 (Homegeneous to Cartesian coordinates) and vice versa
     -Review EVERYTHING
 
 Parser:
@@ -17,7 +16,16 @@ Normal Calculation:
 
 18-05-2022 -> 24-05-2022
 
+Ray tracing:
+    -Review
+
+Image Coloring:
+    -Color the image with the pixels on the pixel list
 
 
 
 25-05-2022 -> 31-05-2022
+
+
+
+01-06-2022 -> 07-06-2022
