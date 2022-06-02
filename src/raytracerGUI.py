@@ -17,14 +17,14 @@ class Ui_MainWindow(object):
 
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1900, 900)
+        MainWindow.resize(1500, 900)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.centralwidget.showMaximized()
 
         # Image container
         self.image_container = QtWidgets.QGraphicsView(self.centralwidget)
-        self.image_container.setGeometry(QtCore.QRect(600, 10, 1200, 800))
+        self.image_container.setGeometry(QtCore.QRect(600, 10, 800, 800))
         self.image_container.setObjectName("image_container")
 
         # Progress Bar

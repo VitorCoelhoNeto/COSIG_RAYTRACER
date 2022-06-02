@@ -369,8 +369,6 @@ def preliminar_calculations(camera: Camera, image: Image) -> list:
 
     pixelList = list()
 
-    file = open("temp.txt", "a", encoding="utf-8")
-
     for j in range(image.resolutionY + 1):
         for i in range(image.resolutionX + 1):
             pixelX = (i + 0.5) * pixelSize - width / 2.0
@@ -383,9 +381,6 @@ def preliminar_calculations(camera: Camera, image: Image) -> list:
             rec = 2
             color = trace_rays(ray, rec)
             color.check_range()
-            file.write(str(directionVector.x) + "   "+ str(directionVector.y) + "   "+ str(directionVector.z) + "\n")
-    
             pixelList.append(Color3(float(int(255.0 * color.red)), float(int(255.0 * color.green)), float(int(255.0 * color.blue))))
 
-    file.close()
     return pixelList
