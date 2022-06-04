@@ -339,6 +339,14 @@ def generate_scene_objects(imageContents: dict) -> list:
     image = Image(imageColor, int(imageContents["Images"][0]["Resolution"]["X"]), int(imageContents["Images"][0]["Resolution"]["Y"]))
     sceneObjects.append(image)
 
+    # Light source
+    lightTransformation = Transformation()
+    lightTranslation = imageContents["Transformations"][int(imageContents["Lights"][0]["Transformation"])]["Translation"]
+    lightTransformation.translate(float(lightTranslation["X"]), float(lightTranslation["Y"]), float(lightTranslation["Z"]))
+    lightColor = Color3(float(imageContents["Lights"][0]["Color"]["Red"]), float(imageContents["Lights"][0]["Color"]["Green"]), float(imageContents["Lights"][0]["Color"]["Blue"]))
+    light = Light(lightTransformation, lightColor)
+    sceneObjects.append(light)
+
     # Sphere
     sphereTransformation = Transformation()
     sphereTranslation = imageContents["Transformations"][int(imageContents["Spheres"][0]["Transformation"])]["Translation"]
@@ -356,14 +364,6 @@ def generate_scene_objects(imageContents: dict) -> list:
                         float(sphereMatProps["Refraction_Index"]))
     sphere = Sphere(sphereTransformation, sphereMat)
     sceneObjects.append(sphere)
-
-    # Light source
-    lightTransformation = Transformation()
-    lightTranslation = imageContents["Transformations"][int(imageContents["Lights"][0]["Transformation"])]["Translation"]
-    lightTransformation.translate(float(lightTranslation["X"]), float(lightTranslation["Y"]), float(lightTranslation["Z"]))
-    lightColor = Color3(float(imageContents["Lights"][0]["Color"]["Red"]), float(imageContents["Lights"][0]["Color"]["Green"]), float(imageContents["Lights"][0]["Color"]["Blue"]))
-    light = Light(lightTransformation, lightColor)
-    sceneObjects.append(light)
 
     # Box
     boxTransformation = Transformation()

@@ -66,8 +66,8 @@ def testes():
     # Get sceneObjects and pixelList
     LIST_CAM = 0
     LIST_IMG = 1
-    LIST_SPH = 2
-    LIST_LIG = 3
+    LIST_LIG = 2
+    LIST_SPH = 3
     LIST_BOX = 4
     LIST_FLO = 5
     LIST_PYR = 6
