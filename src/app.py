@@ -268,18 +268,18 @@ def parser(path):
 
 
 
-def normal_calculation(imageContents, mesh):
+def get_mesh_triangle_list(imageContents, mesh):
     """
-    Calculates triangle normals.
-    :param dict imageContents: Dictionary containing objects' properties
-    :param int mesh: Mesh index (0 is the floor, 1 is the pyramid and 2 is the donut)
-    :returns: normalDict
+    Gets the triangles of a specific mesh into a triangle list
+    :param dict imageContents: Dictionary containing image objects
+    :para int mesh: Mesh index  (0 for floor, 1 for pyramid, 2 for donut)
+    :returns: triangleList
     :rtype: dict
     """
     triangleList = []
 
     for key, triangle in imageContents["TriangleMeshes"][mesh]["Triangles"].items():
-        transformation = Transformation([[1,1,1,1], [1,1,1,1], [1,1,1,1], [1,1,1,1]])
+        transformation = Transformation() #Because all triangles have transformation 0 and it is the identity matrix, no more calculations are needed
         material = Material(Color3(     float(imageContents["Materials"][float(triangle["Material"])]["Color"]["Red"]),
                                         float(imageContents["Materials"][float(triangle["Material"])]["Color"]["Green"]),
                                         float(imageContents["Materials"][float(triangle["Material"])]["Color"]["Blue"])),
@@ -293,10 +293,20 @@ def normal_calculation(imageContents, mesh):
         vec3 = Vector3(float(triangle["(2,0)"]), float(triangle["(2,1)"]), float(triangle["(2,2)"]))
         triangleList.append(Triangle(transformation, material, vec1, vec2, vec3))
 
+    return triangleList
+
+
+
+def calculate_mesh_normals(triangleList):
+    """
+    Calculates triangle normals.
+    :param dict triangleList: Dictionary containing triangles
+    :returns: normalDict
+    :rtype: dict
+    """
     normalDict = {}
     for iteration, triangle in enumerate(triangleList):
         triangleNormal = triangle.calculate_normal()
-        #print(triangle.print_transformation())
         normalDict[iteration] = triangleNormal
     return normalDict
 
@@ -329,13 +339,76 @@ def generate_scene_objects(imageContents: dict) -> list:
     image = Image(imageColor, int(imageContents["Images"][0]["Resolution"]["X"]), int(imageContents["Images"][0]["Resolution"]["Y"]))
     sceneObjects.append(image)
 
+    # Sphere
+    sphereTransformation = Transformation()
+    sphereTranslation = imageContents["Transformations"][int(imageContents["Spheres"][0]["Transformation"])]["Translation"]
+    sphereTransformation.translate(float(sphereTranslation["X"]), float(sphereTranslation["Y"]), float(sphereTranslation["Z"]))
+    sphereScale = imageContents["Transformations"][int(imageContents["Spheres"][0]["Transformation"])]["Scale"]
+    sphereTransformation.scale(float(sphereScale["X"]), float(sphereScale["Y"]), float(sphereScale["Z"]))
+    sphereMatColor = imageContents["Materials"][int(imageContents["Spheres"][0]["Material"])]["Color"]
+    sphereColor = Color3(float(sphereMatColor["Red"]), float(sphereMatColor["Green"]), float(sphereMatColor["Blue"]))
+    sphereMatProps = imageContents["Materials"][int(imageContents["Spheres"][0]["Material"])]["Properties"]
+    sphereMat = Material(sphereColor, 
+                        float(sphereMatProps["Ambient"]), 
+                        float(sphereMatProps["Diffuse"]), 
+                        float(sphereMatProps["Specular"]), 
+                        float(sphereMatProps["Refraction"]),
+                        float(sphereMatProps["Refraction_Index"]))
+    sphere = Sphere(sphereTransformation, sphereMat)
+    sceneObjects.append(sphere)
+
+    # Light source
+    lightTransformation = Transformation()
+    lightTranslation = imageContents["Transformations"][int(imageContents["Lights"][0]["Transformation"])]["Translation"]
+    lightTransformation.translate(float(lightTranslation["X"]), float(lightTranslation["Y"]), float(lightTranslation["Z"]))
+    lightColor = Color3(float(imageContents["Lights"][0]["Color"]["Red"]), float(imageContents["Lights"][0]["Color"]["Green"]), float(imageContents["Lights"][0]["Color"]["Blue"]))
+    light = Light(lightTransformation, lightColor)
+    sceneObjects.append(light)
+
+    # Box
+    boxTransformation = Transformation()
+    boxTranslation = imageContents["Transformations"][int(imageContents["Boxes"][0]["Transformation"])]["Translation"]
+    boxTransformation.translate(float(boxTranslation["X"]), float(boxTranslation["Y"]), float(boxTranslation["Z"]))
+    boxScale = imageContents["Transformations"][int(imageContents["Boxes"][0]["Transformation"])]["Scale"]
+    boxTransformation.scale(float(boxScale["X"]), float(boxScale["Y"]), float(boxScale["Z"]))
+    boxMatColor = imageContents["Materials"][int(imageContents["Boxes"][0]["Material"])]["Color"]
+    boxColor = Color3(float(boxMatColor["Red"]), float(boxMatColor["Green"]), float(boxMatColor["Blue"]))
+    boxMatProps = imageContents["Materials"][int(imageContents["Boxes"][0]["Material"])]["Properties"]
+    boxMat = Material(boxColor, 
+                        float(boxMatProps["Ambient"]), 
+                        float(boxMatProps["Diffuse"]), 
+                        float(boxMatProps["Specular"]), 
+                        float(boxMatProps["Refraction"]),
+                        float(boxMatProps["Refraction_Index"]))
+    box = Box(boxTransformation, boxMat)
+    sceneObjects.append(box)
+
+    # Meshes, appliable to all three meshes
+    meshMat = Material(Color3(0.0, 0.0, 0.0), 0.5, 0.5, 0.5, 0.5, 1.5) # Dummy material as it is irrelevant because each triangle has its own material
+    meshTransformation = Transformation() # All meshes have transformation 0, which is equivalent to the identity matrix
+
+    # Floor mesh
+    floorTriangleList = get_mesh_triangle_list(imageContents, 0)
+    floorMesh = TrianglesMesh(meshTransformation, meshMat, floorTriangleList)
+    sceneObjects.append(floorMesh)
+
+    # Pyramid mesh
+    pyramidTriangleList = get_mesh_triangle_list(imageContents, 1)
+    pyramidMesh = TrianglesMesh(meshTransformation, meshMat, pyramidTriangleList)
+    sceneObjects.append(pyramidMesh)
+
+    # Donut mesh
+    donutTriangleList = get_mesh_triangle_list(imageContents, 2)
+    donutMesh = TrianglesMesh(meshTransformation, meshMat, donutTriangleList)
+    sceneObjects.append(donutMesh)
+
     return sceneObjects
 
 
 
 def trace_rays(ray: Ray, rec: int) -> Color3:
     """
-    Traces the rays, recursively following the path the ray takes and returns a color.
+    Traces the rays, recursively following the path the ray takes and returns a color based on the object intersection.
     :param Ray ray: Ray to be traced.
     :param int rec: Recursivity level.
     :returns: A Color3 object

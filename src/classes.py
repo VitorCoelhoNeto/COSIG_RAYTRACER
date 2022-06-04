@@ -477,6 +477,10 @@ class Material:
         self.specular = specular
         self.refraction = refraction
         self.refractionIndex = refractionIndex
+    
+    
+    def print_material(self):
+        print(self.color.print_colors(), "\n", self.ambient, self.diffuse, self.specular, self.refraction, self.refractionIndex)
 
 
 class Object3D:
@@ -493,6 +497,13 @@ class Object3D:
             raise TypeError("Wrong material type")
         self.transformation = transformation
         self.material = material
+    
+    
+    def intersect(self, ray: Ray, hit: Hit, tmin: float):
+        epsilon = 1 * pow(10, -6)
+        print(epsilon)
+        pass
+
 
 
 class Triangle(Object3D):
@@ -556,8 +567,14 @@ class TrianglesMesh(Object3D):
     :param Material material: Object material
     """
 
-    def __init__(self, transformation, material):
+    def __init__(self, transformation: Transformation, material: Material, triangleList: list):
         super().__init__(transformation, material)
+        self.triangleList = triangleList
+
+    
+    def print_triangles_vertices(self):
+        for triangle in self.triangleList:
+            triangle.print_vertices()
 
 
 class Box(Object3D):

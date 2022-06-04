@@ -48,7 +48,10 @@ def testes():
     #    file2.write(json.dumps(imageContents, indent=4, separators=(',', ':')))
 
     # Test creating the parsed triangles
-    #normalDict = normal_calculation(imageContents, 1)
+    #floorTriangleList = get_mesh_triangle_list(imageContents, 0)
+    #pyramidTriangleList = get_mesh_triangle_list(imageContents, 1)
+    #donutTriangleList = get_mesh_triangle_list(imageContents, 2)
+    #normalDict = calculate_mesh_normals(pyramidTriangleList)
     #print(normalDict[2][0])
     #print(normalDict)
     
@@ -60,8 +63,34 @@ def testes():
     #print(testTransform.transpose_matrix())
     #testTransform.print_matrix_items()
 
+    # Get sceneObjects and pixelList
+    LIST_CAM = 0
+    LIST_IMG = 1
+    LIST_SPH = 2
+    LIST_LIG = 3
+    LIST_BOX = 4
+    LIST_FLO = 5
+    LIST_PYR = 6
+    LIST_DON = 7
     sceneObjects = generate_scene_objects(imageContents)
-    pixelList = preliminar_calculations(sceneObjects[0], sceneObjects[1])
+    pixelList = preliminar_calculations(sceneObjects[LIST_CAM], sceneObjects[LIST_IMG])
+
+    # Test for mesh triangle's vertices
+    #sceneObjects[LIST_PYR].print_triangles_vertices()
+
+    # Test for transformation matrices
+    #print(sceneObjects[LIST_CAM].transformation.get_matrix())
+
+    #Test for materials
+    #print(sceneObjects[LIST_SPH].material.print_material())
+
+    # Sphere intersection
+    #sceneObjects[LIST_SPH].intersect(1, 2, 3)
+
+    # Final matrices
+    #print(np.matmul(sceneObjects[LIST_CAM].transformation.get_matrix(), sceneObjects[LIST_LIG].transformation.get_matrix()), "\n\n")
+    #print(np.matmul(sceneObjects[LIST_CAM].transformation.get_matrix(), sceneObjects[LIST_BOX].transformation.get_matrix()), "\n\n")
+    #print(np.matmul(sceneObjects[LIST_CAM].transformation.get_matrix(), sceneObjects[LIST_SPH].transformation.get_matrix()), "\n\n")
     pass
 
 
