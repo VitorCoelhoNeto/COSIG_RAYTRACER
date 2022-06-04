@@ -8,6 +8,7 @@ Use the package manager **[pip](https://pip.pypa.io/en/stable/)** to install the
 Contained in requirements.txt, these are:
 1. PyQt5 -> version 5.15.6, used for the UI
 2. pyqt5-tools -> version ??, used for the Qt Designer
+3. numpy -> version 1.22.3, used for mathematical operations
 
 ```bash
 pip install requirements.txt
@@ -34,6 +35,11 @@ import re
 Used **Python** PyQt5 library imports:
 ```Python
 from PyQt5 import QtCore, QtGui, QtWidgets
+```
+
+Used **Python** numpy library imports:
+```Python
+import numpy as np
 ```
 
 This version's function's documentation follows [Python's recommended documentation guidelines](https://realpython.com/documenting-python-code/), where in **:param *type* *var*: *description***:
