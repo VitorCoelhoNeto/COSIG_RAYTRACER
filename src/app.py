@@ -441,9 +441,10 @@ def preliminar_calculations(camera: Camera, image: Image) -> list:
     origin  = Vector3(0, 0, camDistance)
 
     pixelList = list()
+    rayList = list()
 
-    for j in range(image.resolutionY + 1):
-        for i in range(image.resolutionX + 1):
+    for j in range(image.resolutionY):
+        for i in range(image.resolutionX):
             pixelX = (i + 0.5) * pixelSize - width / 2.0
             pixelY = -(j + 0.5) * pixelSize + height / 2.0
             pixelZ = 0
@@ -454,6 +455,7 @@ def preliminar_calculations(camera: Camera, image: Image) -> list:
             rec = 2
             color = trace_rays(ray, rec)
             color.check_range()
+            rayList.append(ray)
             pixelList.append(Color3(float(int(255.0 * color.red)), float(int(255.0 * color.green)), float(int(255.0 * color.blue))))
 
-    return pixelList
+    return pixelList, rayList

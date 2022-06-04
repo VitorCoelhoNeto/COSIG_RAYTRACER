@@ -238,7 +238,7 @@ class Ui_MainWindow(object):
             LIST_PYR = 6
             LIST_DON = 7
             sceneObjects = app.generate_scene_objects(imageContents)
-            pixelList = app.preliminar_calculations(sceneObjects[LIST_CAM], sceneObjects[LIST_IMG])
+            pixelList, rayList = app.preliminar_calculations(sceneObjects[LIST_CAM], sceneObjects[LIST_IMG])
             
             # Image
             self.horizontal_spinBox_6.setValue(int(imageContents["Images"][0]["Resolution"]["X"]))

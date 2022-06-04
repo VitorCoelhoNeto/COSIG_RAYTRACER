@@ -73,7 +73,7 @@ def testes():
     LIST_PYR = 6
     LIST_DON = 7
     sceneObjects = generate_scene_objects(imageContents)
-    pixelList = preliminar_calculations(sceneObjects[LIST_CAM], sceneObjects[LIST_IMG])
+    pixelList, rayList = preliminar_calculations(sceneObjects[LIST_CAM], sceneObjects[LIST_IMG])
 
     # Test for mesh triangle's vertices
     #sceneObjects[LIST_PYR].print_triangles_vertices()
@@ -84,7 +84,12 @@ def testes():
     #Test for materials
     #print(sceneObjects[LIST_SPH].material.print_material())
 
-    # Sphere intersection
+    # Object3D intersection
+    #for ray in rayList:
+    #    print(ray.print_ray_origin())
+    #print(len(rayList))
+    for triangle in sceneObjects[LIST_FLO].triangleList:
+        print(triangle.print_vertices())
     #sceneObjects[LIST_SPH].intersect(1, 2, 3)
 
     # Final matrices

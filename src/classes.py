@@ -242,6 +242,15 @@ class Ray:
             return self.origin + self.direction*t
 
 
+    def print_ray_direction(self):
+        print("X: ", self.direction.x, " Y: ", self.direction.y, " Z: ", self.direction.z)
+
+
+    def print_ray_origin(self):
+        print("X: ", self.origin.x, " Y: ", self.origin.y, " Z: ", self.origin.z)
+
+
+
 class Hit:
     """
     Represents information obtained by the intersection of a light ray and an object.
@@ -499,10 +508,9 @@ class Object3D:
         self.material = material
     
     
-    def intersect(self, ray: Ray, hit: Hit, tmin: float):
+    def intersect(self, ray: Ray, hit: Hit, tmin: float) -> bool:
         epsilon = 1 * pow(10, -6)
-        print(epsilon)
-        pass
+        return True
 
 
 
@@ -521,6 +529,7 @@ class Triangle(Object3D):
         self.vertex2 = vertex2
         self.vertex3 = vertex3
 
+
     def print_vertices(self):
         """
         Prints triangle's vertices coordinates.
@@ -528,6 +537,7 @@ class Triangle(Object3D):
         print("Vertex 1: ", self.vertex1.x, self.vertex1.y, self.vertex1.z)
         print("Vertex 2: ", self.vertex2.x, self.vertex2.y, self.vertex2.z)
         print("Vertex 3: ", self.vertex3.x, self.vertex3.y, self.vertex3.z)
+
 
     def print_material_properties(self):
         """
@@ -541,11 +551,13 @@ class Triangle(Object3D):
               " Refraction:", self.material.refraction,
               " Refraction Index:", self.material.refractionIndex)
 
+
     def print_transformation(self):
         """
         Prints triangle's transformation
         """
         print(self.transformation.print_matrix_items())
+
 
     def calculate_normal(self):
         """
