@@ -3,6 +3,7 @@ import json
 import re
 from raytracerGUI  import *
 from classes import *
+from tqdm import tqdm
 
 def window():
     """
@@ -416,8 +417,9 @@ def trace_rays(ray: Ray, rec: int, sceneObjects: list) -> Color3:
     """
     hit = Hit(False, Material(Color3(0.0, 0.0, 0.0), 0.5, 0.5, 0.5, 0.5, 1.5), Vector3(0, 0, 0), Vector3(0, 0, 0), 0.0, float(1 * pow(10, 12)))
     for object in sceneObjects:
-        if isinstance(object, Box): # TODO
-            object.intersect(ray, hit, hit.t_min)
+        if isinstance(object, TrianglesMesh): # TODO
+            for triangle in object.triangleList:
+                triangle.intersect(ray, hit)
 
     if hit.found:
         return hit.material.color # se houver intersecção, retorna a cor do material constituinte do objecto intersectado mais próximo da origem do raio                          
@@ -455,7 +457,7 @@ def preliminar_calculations(camera: Camera, image: Image, sceneObjects: list) ->
 
     # For each pixel in the image, generate a ray from the camera to the back of the scene to check if the ray intersects with any scene objects.
     # If it does, return the color of the intersection. With that list of colors (40k), an image will be generated with the calculated colors.
-    for j in range(image.resolutionY):
+    for j in tqdm(range(image.resolutionY)):
         for i in range(image.resolutionX):
             pixelX = (i + 0.5) * pixelSize - width / 2.0
             pixelY = -(j + 0.5) * pixelSize + height / 2.0

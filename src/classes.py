@@ -149,7 +149,7 @@ class Vector3:
         :rtype: Vector3
         """
         if isinstance(t, float) or isinstance(t, int):
-            return Vector3(self.x * t, self.y * t, self.z * t)
+            return Vector3(float(self.x * t), float(self.y * t), float(self.z * t))
 
     def __sub__(self, vec3):
         """
@@ -514,7 +514,7 @@ class Object3D:
         self.material = material
     
     
-    def intersect(self, ray: Ray, hit: Hit, tmin: float) -> bool: #TODO Calculate distance between self and ray
+    def intersect(self, ray: Ray, hit: Hit) -> bool:
         epsilon = 1 * pow(10, -6)
         return True
 
@@ -576,6 +576,56 @@ class Triangle(Object3D):
         normal = edgeAB.calculate_vectorial_product(edgeBC)
         tempVec = Vector3(float(normal[0]), float(normal[1]), float(normal[2]))
         return tempVec.normalize_vector()
+    
+    
+    def intersect(self, ray: Ray, hit: Hit) -> bool: 
+        """
+        Checks if the ray hits the object or not.
+        :param Ray ray: Current ray being analyzed.
+        :param Hit hit: Information about the ray intersection with the current object. If no intersection, hit.found = False, rest is irrelevant.
+        :returns: True if ray intersects current object, False if not
+        :rtype: bool
+        """
+        #return super().intersect(ray, hit)
+        epsilon = 1 * pow(10, -6)
+
+        beta = (self.calculate_determinant([ [(self.vertex1.x - ray.origin.x), (self.vertex1.x - self.vertex3.x), ray.direction.x ], 
+                                             [(self.vertex1.y - ray.origin.y), (self.vertex1.y - self.vertex3.y), ray.direction.y], 
+                                             [(self.vertex1.z - ray.origin.z), (self.vertex1.z - self.vertex3.z), ray.direction.z] ])) / (self.calculate_determinant([
+                                                
+                                             [(self.vertex1.x - self.vertex2.x), (self.vertex1.x - self.vertex3.x), ray.direction.x], 
+                                             [(self.vertex1.y - self.vertex2.y), (self.vertex1.y - self.vertex3.y), ray.direction.y], 
+                                             [(self.vertex1.z - self.vertex2.z), (self.vertex1.z - self.vertex3.z), ray.direction.z] ]))
+
+        if beta >= 0:
+            gamma = (self.calculate_determinant([ [(self.vertex1.x - self.vertex2.x), (self.vertex1.x - ray.origin.x), ray.direction.x], 
+                                                  [(self.vertex1.y - self.vertex2.y), (self.vertex1.y - ray.origin.y), ray.direction.y],
+                                                  [(self.vertex1.z - self.vertex2.z), (self.vertex1.z - ray.origin.z), ray.direction.z] ])) / (self.calculate_determinant([
+                                                  
+                                                  [(self.vertex1.x - self.vertex2.x), (self.vertex1.x - self.vertex3.x), ray.direction.x], 
+                                                  [(self.vertex1.y - self.vertex2.y), (self.vertex1.y - self.vertex3.y), ray.direction.y], 
+                                                  [(self.vertex1.z - self.vertex2.z), (self.vertex1.z - self.vertex3.z), ray.direction.z] ]))
+            # alpha = 1.0 - beta - gamma # Not necessary because we already know that if β > 0.0, γ > 0.0 and β + γ < 1.0 the ray intersects the object
+            
+            # Check if ray intersects #TODO
+            if beta >= -epsilon and gamma >= -epsilon and (beta + gamma < 1.0 + epsilon):
+                point = self.vertex1 + (self.vertex2 - self.vertex1) * beta + (self.vertex3 - self.vertex1) * gamma
+                with open("temp.txt", "a", encoding="utf-8") as file:
+                    file.write(str(point.x) + "\t\t" + str(point.y) + "\t\t" + str(point.z) + "\n")
+                return True
+
+        return False
+
+    
+    def calculate_determinant(self, matrix):
+        """
+        CAlculates a matrix determinant.
+        :param list/np.array matrix: Matrix to be determined.
+        :returns: The matrix's determinant. 
+        :rtype: float
+        """
+        return np.linalg.det(np.array(matrix))
+
 
 
 class TrianglesMesh(Object3D):
