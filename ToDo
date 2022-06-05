@@ -1,36 +1,29 @@
 12-05-2022 -> 18-05-2022
-
 UI:
     -Done
-
 Classes:
-    -Review EVERYTHING
-
+    -Done
 Parser:
     -Done
-
 Normal Calculation:
     -Done
 
 
 
-
-
 18-05-2022 -> 24-05-2022
-
 Ray tracing:
     -Done
-
 Image Coloring:
     -Color the image with the pixels on the pixel list
 
 
 
-
-
 25-05-2022 -> 31-05-2022
-
-
+Trace_rays function (called for each pixel, each ray), returns a Color3:
+    -Done
+Intersect function:
+    -Calculate Barymetric Coordinates
+    -Check if ray intersects or not the object (Hit.found = False if not, else, change Hit parameters)
 
 
 

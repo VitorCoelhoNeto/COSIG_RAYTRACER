@@ -406,7 +406,7 @@ def generate_scene_objects(imageContents: dict) -> list:
 
 
 
-def trace_rays(ray: Ray, rec: int) -> Color3:
+def trace_rays(ray: Ray, rec: int, sceneObjects: list) -> Color3:
     """
     Traces the rays, recursively following the path the ray takes and returns a color based on the object intersection.
     :param Ray ray: Ray to be traced.
@@ -414,15 +414,25 @@ def trace_rays(ray: Ray, rec: int) -> Color3:
     :returns: A Color3 object
     :rtype: Color3
     """
-    return Color3(0.4, 0.5, 0.6)
+    hit = Hit(False, Material(Color3(0.0, 0.0, 0.0), 0.5, 0.5, 0.5, 0.5, 1.5), Vector3(0, 0, 0), Vector3(0, 0, 0), 0.0, float(1 * pow(10, 12)))
+    for object in sceneObjects:
+        if isinstance(object, Box): # TODO
+            object.intersect(ray, hit, hit.t_min)
+
+    if hit.found:
+        return hit.material.color # se houver intersecção, retorna a cor do material constituinte do objecto intersectado mais próximo da origem do raio                          
+    else:
+        #return image.backgroundColor;  # caso contrário, retorna a cor de fundo
+        return Color3(0.0, 0.0, 0.0)
 
 
 
-def preliminar_calculations(camera: Camera, image: Image) -> list:
+def preliminar_calculations(camera: Camera, image: Image, sceneObjects: list) -> list:
     """
     Preliminar calculations
     :param Camera camera: Scene's camera object.
     :param Image image: Scene's image object.
+    :param list sceneObjects: List with all of the scene objects, including camera, light and image.
     :returns: pixelList, a list of colors of each pixel
     :rtype: list
     """
@@ -443,6 +453,8 @@ def preliminar_calculations(camera: Camera, image: Image) -> list:
     pixelList = list()
     rayList = list()
 
+    # For each pixel in the image, generate a ray from the camera to the back of the scene to check if the ray intersects with any scene objects.
+    # If it does, return the color of the intersection. With that list of colors (40k), an image will be generated with the calculated colors.
     for j in range(image.resolutionY):
         for i in range(image.resolutionX):
             pixelX = (i + 0.5) * pixelSize - width / 2.0
@@ -453,7 +465,7 @@ def preliminar_calculations(camera: Camera, image: Image) -> list:
             directionVector = Vector3(float(direction[0]), float(direction[1]), float(direction[2]))
             ray = Ray(origin, directionVector)
             rec = 2
-            color = trace_rays(ray, rec)
+            color = trace_rays(ray, rec, sceneObjects)
             color.check_range()
             rayList.append(ray)
             pixelList.append(Color3(float(int(255.0 * color.red)), float(int(255.0 * color.green)), float(int(255.0 * color.blue))))

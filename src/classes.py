@@ -263,7 +263,7 @@ class Hit:
     """
 
     def __init__(self, found, material, point, normal, t, t_min):
-        if not isinstance(found, bool) or not isinstance(material, Material) or not isinstance(point, Vector3) or not isinstance(normal, Vector3) or not isinstance(normal, float) or not isinstance(normal, float):
+        if not isinstance(found, bool) or not isinstance(material, Material) or not isinstance(point, Vector3) or not isinstance(normal, Vector3) or not isinstance(t, float) or not isinstance(t_min, float):
             raise TypeError("Wrong data type(s) on class constructor")
         self.found = found
         self.material = material
@@ -391,8 +391,14 @@ class Transformation:
         """
         return np.array(self.matrix).transpose()
 
-    def inverse_matrix(self):  # TODO
-        pass
+    def inverse_matrix(self):
+        """
+        Returns the inverse matrix of the matrix. (DOES NOT AFFECT THE MATRIX ITSELF)
+        """
+        try:
+            return np.linalg.inv(np.array(self.matrix))
+        except:
+            print("Matrix is singular and cannot be inverted")
 
 
 class Image:
@@ -508,7 +514,7 @@ class Object3D:
         self.material = material
     
     
-    def intersect(self, ray: Ray, hit: Hit, tmin: float) -> bool:
+    def intersect(self, ray: Ray, hit: Hit, tmin: float) -> bool: #TODO Calculate distance between self and ray
         epsilon = 1 * pow(10, -6)
         return True
 
