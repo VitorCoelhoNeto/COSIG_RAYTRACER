@@ -607,12 +607,20 @@ class Triangle(Object3D):
                                                   [(self.vertex1.z - self.vertex2.z), (self.vertex1.z - self.vertex3.z), ray.direction.z] ]))
             # alpha = 1.0 - beta - gamma # Not necessary because we already know that if β > 0.0, γ > 0.0 and β + γ < 1.0 the ray intersects the object
             
-            # Check if ray intersects #TODO
+            # Check if ray intersects
             if beta >= -epsilon and gamma >= -epsilon and (beta + gamma < 1.0 + epsilon):
                 point = self.vertex1 + (self.vertex2 - self.vertex1) * beta + (self.vertex3 - self.vertex1) * gamma
-                with open("temp.txt", "a", encoding="utf-8") as file:
-                    file.write(str(point.x) + "\t\t" + str(point.y) + "\t\t" + str(point.z) + "\n")
-                return True
+
+                v = point - ray.origin
+                hit.t = v.calculate_distance()
+                
+                if hit.t >= epsilon and hit.t < hit.t_min:
+                    hit.found = True
+                    hit.material = self.material
+                    hit.point = point
+                    hit.normal = self.calculate_normal()
+                    hit.t_min = hit.t
+                    return True
 
         return False
 

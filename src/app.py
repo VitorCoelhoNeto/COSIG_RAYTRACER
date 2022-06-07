@@ -415,16 +415,22 @@ def trace_rays(ray: Ray, rec: int, sceneObjects: list) -> Color3:
     :returns: A Color3 object
     :rtype: Color3
     """
-    hit = Hit(False, Material(Color3(0.0, 0.0, 0.0), 0.5, 0.5, 0.5, 0.5, 1.5), Vector3(0, 0, 0), Vector3(0, 0, 0), 0.0, float(1 * pow(10, 12)))
-    for object in sceneObjects:
-        if isinstance(object, TrianglesMesh): # TODO
-            for triangle in object.triangleList:
-                triangle.intersect(ray, hit)
+    hit = Hit(False, Material(Color3(0.0, 0.0, 0.0), 0.0, 0.0, 0.0, 0.0, 1.0), Vector3(0, 0, 0), Vector3(0, 0, 0), 0.0, float(1 * pow(10, 12)))
+    for object in sceneObjects: # TODO
+        if isinstance(object, TrianglesMesh): 
+            if len(object.triangleList) == 128: # Só estamos a fazer para o chão para já, para acelerar os testes
+                for triangle in object.triangleList:
+                    triangle.intersect(ray, hit)
+        if isinstance(object, Box):
+            pass
+        if isinstance(object, Sphere):
+            pass
 
     if hit.found:
-        return hit.material.color # se houver intersecção, retorna a cor do material constituinte do objecto intersectado mais próximo da origem do raio                          
+        # If the ray intersects an object, paint the pixel with the nearest scene object material color         
+        return hit.material.color
     else:
-        #return image.backgroundColor;  # caso contrário, retorna a cor de fundo
+        # If the ray hits no scene objects, paint the pixel with the background color (Black)
         return Color3(0.0, 0.0, 0.0)
 
 

@@ -22,9 +22,16 @@ Image Coloring:
 Trace_rays function (called for each pixel, each ray), returns a Color3:
     -Done
 Intersect function:
-    -Calculate Barymetric Coordinates
+    -Calculate Barymetric Coordinates:
+        -Done
     -Check if ray intersects or not the object (Hit.found = False if not, else, change Hit parameters)
-
+        -Done
+    -Return hit color
+        -Done
+    -Test pixel colors
+        -Done
+    -Do the intersect function for the box and the sphere
+        -
 
 
 01-06-2022 -> 07-06-2022
