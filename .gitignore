@@ -9,6 +9,7 @@ __pycache__/
 # Temporary test files
 temp.txt
 temp.json
+backup_stuff/
 
 # Distribution / packaging
 .Python
