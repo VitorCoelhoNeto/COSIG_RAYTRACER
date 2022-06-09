@@ -55,8 +55,27 @@ class Vector3:
         self.y = y
         self.z = z
 
+
     def print_coordinates(self):
         print(self.x, self.y, self.z)
+
+
+    def convert_point3_vector4(self): #TODO
+        """
+        For a point, converts Cartesian coordinates to Homogeneous coordinates.
+        :returns: Converted Vector3 to Vector4 (Point).
+        :rtype: Vector4
+        """
+        return Vector4(self.x, self.y, self.z, 1.0)
+
+    
+    def convert_vector3_vector4(self): #TODO
+        """
+        For a vector, converts Cartesian coordinates to Homogeneous coordinates.
+        :returns: Converted Vector3 to Vector4 (vector).
+        :rtype: Vector4
+        """
+        return Vector4(self.x, self.y, self.z, 0.0)
 
 
     def normalize_vector(self):
@@ -68,7 +87,9 @@ class Vector3:
         """
         mainArray = [self.x, self.y, self.z]
         # normalized x = x/sqrt(x^2 + y^2 + z^2) and the same goes for y and z
-        return np.array(mainArray) / np.sqrt(np.sum(np.array(mainArray)**2))
+        normalized = np.array(mainArray) / np.sqrt(np.sum(np.array(mainArray)**2))
+        return Vector3(float(normalized[0]), float(normalized[1]), float(normalized[2]))
+
 
     def calculate_distance(self):
         """
@@ -77,6 +98,7 @@ class Vector3:
         :rtype: float
         """
         return np.sqrt(pow(self.x, 2) + pow(self.y, 2) + pow(self.z, 2))
+
 
     def calculate_scalar_product(self, vector2):
         """
@@ -87,7 +109,9 @@ class Vector3:
         """
         mainArray = [self.x, self.y, self.z]
         secondArray = [vector2.x, vector2.y, vector2.z]
-        return np.dot(np.array(mainArray), np.array(secondArray))
+        dotProduct = np.dot(np.array(mainArray), np.array(secondArray))
+        return Vector3(float(dotProduct[0]), float(dotProduct[1]), float(dotProduct[2]))
+
 
     def calculate_vectorial_product(self, vector2):
         """
@@ -98,7 +122,9 @@ class Vector3:
         """
         mainArray = [self.x, self.y, self.z]
         secondArray = [vector2.x, vector2.y, vector2.z]
-        return np.cross(np.array(mainArray), np.array(secondArray))
+        crossProduct = np.cross(np.array(mainArray), np.array(secondArray))
+        return Vector3(float(crossProduct[0]), float(crossProduct[1]), float(crossProduct[2])) 
+
 
     def calculate_distance_two(self, vector2):
         """
@@ -111,6 +137,7 @@ class Vector3:
             raise TypeError("vector2 needs to be of type Vector3")
         return np.sqrt(pow((vector2.x - self.x), 2) + pow((vector2.y - self.y), 2) + pow((vector2.z - self.z), 2))
 
+
     def __add__(self, vec3):
         """
         Overload of the '+' operation
@@ -121,6 +148,7 @@ class Vector3:
         if isinstance(vec3, Vector3):
             return Vector3(self.x + vec3.x, self.y + vec3.y, self.z + vec3.z)
 
+
     def __mul__(self, t):
         """
         Overload of the '*' operation
@@ -130,6 +158,7 @@ class Vector3:
         """
         if isinstance(t, float) or isinstance(t, int):
             return Vector3(float(self.x * t), float(self.y * t), float(self.z * t))
+
 
     def __sub__(self, vec3):
         """
@@ -160,51 +189,60 @@ class Vector4:
         self.z = z
         self.w = w
 
+
     def print_coordinates(self):
         print(self.x, self.y, self.z, self.w)
 
-    def convertVectorHomoToCar(self):
+
+    def convert_point4_vector3(self):
+        """
+        For a point, converts Homogeneous coordinates to Cartesian coordinates.
+        :returns: Converted Vector4 to Vector3 (Point).
+        :rtype: Vector3
+        """
+        return Vector3(self.x / self.w, self.y / self.w, self.z / self.w)
+
+
+    def convert_vector4_vector3(self):
         """
         For a vector, converts Homogeneous coordinates to Cartesian coordinates
-        :param Vector4 self: Vector to be converted 
+        :returns: Converted Vector4 to Vector3 (Vector).
+        :rtype: Vector3
         """
         return Vector3(self.x, self.y, self.z)
 
-    def convertVectorCarToHomo(vec3):
-        """
-        For a vector, converts Cartesian coordinates to Homogeneous coordinates 
-        :param Vector3 vec3: Vector to be converted
-        """
-        return Vector4(vec3.x, vec3.x, vec3.x, 0)
 
-    #---------------------------   VERIFICAR CONVERSÃO DOS PONTOS ---------------------
-       
-    def convertPointHomoToCar(self):
-        """
-        For a point, converts Homogeneous coordinates to Cartesian coordinates
-        """
-        self.x = self.x/self.w
-        self.y = self.y/self.w
-        self.z = self.z/self.w
-
-    def convertPointCarToHomo(self):
-        """
-        For a point, converts Cartesian coordinates to Homogeneous coordinates
-        """
-        self.x = self.x
-        self.y = self.y
-        self.z = self.z
-        self.w = 1
-    
     def __sub__(self, vec4):
         """
         Overload of the '-' operation
-        :param Vector3 vec3: Vector to be added to the original one
-        :return: Vector3(self.x + vec3.x, self.y + vec3.y, self.z + vec3.z)
-        :rtype: Vector3
+        :param Vector4 vec4: Vector to be added to the original one
+        :return: Vector4(self.x + vec4.x, self.y + vec4.y, self.z + vec4.z)
+        :rtype: Vector4
         """
         if isinstance(vec4, Vector4):
             return Vector4(self.x - vec4.x, self.y - vec4.y, self.z - vec4.z, self.w - vec4.w)
+    
+
+    def __add__(self, vec4):
+        """
+        Overload of the '-' operation
+        :param Vector4 vec4: Vector to be added to the original one
+        :return: Vector4(self.x + vec4.x, self.y + vec4.y, self.z + vec4.z)
+        :rtype: Vector4
+        """
+        if isinstance(vec4, Vector4):
+            return Vector4(self.x + vec4.x, self.y + vec4.y, self.z + vec4.z, self.w + vec4.w)
+    
+
+    def __mul__(self, t):
+        """
+        Overload of the '-' operation
+        :param float/int t: Vector to be added to the original one
+        :return: Vector4(self.x * t, self.y * t, self.z * t, self.w * t)
+        :rtype: Vector4
+        """
+        if isinstance(t, float) or isinstance(t, int):
+            return Vector4(self.x * t, self.y * t, self.z * t, self.w * t)
     
 
 
