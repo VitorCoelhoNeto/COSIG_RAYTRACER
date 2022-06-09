@@ -1,9 +1,10 @@
 import sys
 import json
 import re
+from tqdm import tqdm
 from raytracerGUI  import *
 from classes import *
-from tqdm import tqdm
+
 
 def window():
     """
@@ -421,9 +422,12 @@ def trace_rays(ray: Ray, rec: int, sceneObjects: list) -> Color3:
             if len(object.triangleList) == 128: # Só estamos a fazer para o chão para já, para acelerar os testes
                 for triangle in object.triangleList:
                     triangle.intersect(ray, hit)
+            pass
         if isinstance(object, Box):
+            #object.intersect(ray, hit)
             pass
         if isinstance(object, Sphere):
+            #object.intersect(ray, hit)
             pass
 
     if hit.found:

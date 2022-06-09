@@ -1,4 +1,5 @@
 from app import *
+from testingUI import *
 
 FILE_PATH = "..\\test_scene_1.txt"
 
@@ -99,10 +100,16 @@ def testes():
     pass
 
 
+def openGUI():
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    window.show()
+    app.exec()
 
 if __name__ == "__main__":
     """
     Main function
     """
     #window()
-    testes()
+    #testes()
+    openGUI()

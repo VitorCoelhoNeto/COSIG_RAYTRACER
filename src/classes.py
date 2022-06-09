@@ -214,6 +214,17 @@ class Vector4:
         self.y = self.y
         self.z = self.z
         self.w = 1
+    
+    def __sub__(self, vec4):
+        """
+        Overload of the '-' operation
+        :param Vector3 vec3: Vector to be added to the original one
+        :return: Vector3(self.x + vec3.x, self.y + vec3.y, self.z + vec3.z)
+        :rtype: Vector3
+        """
+        if isinstance(vec4, Vector4):
+            return Vector4(self.x - vec4.x, self.y - vec4.y, self.z - vec4.z, self.w - vec4.w)
+    
 
 
 class Ray:
@@ -399,6 +410,17 @@ class Transformation:
             return np.linalg.inv(np.array(self.matrix))
         except:
             print("Matrix is singular and cannot be inverted")
+    
+    def __mul__(self, vec4):
+        """
+        Overload of the '*' operation to multiply with Vector4
+        :param Vector4 vec4: Variable to be multiplied by the vector
+        :return: Vector4(self.x * t, self.y * t, self.z * t, 1.0)
+        :rtype: Vector4
+        """
+        if isinstance(vec4, Vector4):
+            vec4Multiplication = [vec4.x, vec4.y, vec4.z, vec4.w]
+            return np.matmul(self.matrix, vec4Multiplication)
 
 
 class Image:
@@ -577,7 +599,7 @@ class Triangle(Object3D):
         tempVec = Vector3(float(normal[0]), float(normal[1]), float(normal[2]))
         return tempVec.normalize_vector()
     
-    
+
     def intersect(self, ray: Ray, hit: Hit) -> bool: 
         """
         Checks if the ray hits the object or not.
@@ -589,22 +611,77 @@ class Triangle(Object3D):
         #return super().intersect(ray, hit)
         epsilon = 1 * pow(10, -6)
 
-        beta = (self.calculate_determinant([ [(self.vertex1.x - ray.origin.x), (self.vertex1.x - self.vertex3.x), ray.direction.x ], 
-                                             [(self.vertex1.y - ray.origin.y), (self.vertex1.y - self.vertex3.y), ray.direction.y], 
-                                             [(self.vertex1.z - ray.origin.z), (self.vertex1.z - self.vertex3.z), ray.direction.z] ])) / (self.calculate_determinant([
+        beta = (self.calculate_determinant([ [(self.vertex1.x - ray.origin.x), (self.vertex1.x - self.vertex3.x), ray.direction.x, 0], 
+                                             [(self.vertex1.y - ray.origin.y), (self.vertex1.y - self.vertex3.y), ray.direction.y, 0], 
+                                             [(self.vertex1.z - (ray.origin.z )), (self.vertex1.z - self.vertex3.z), (ray.direction.z ), 0],
+                                             [0, 0, 0, 1] ])) / (self.calculate_determinant([
                                                 
-                                             [(self.vertex1.x - self.vertex2.x), (self.vertex1.x - self.vertex3.x), ray.direction.x], 
-                                             [(self.vertex1.y - self.vertex2.y), (self.vertex1.y - self.vertex3.y), ray.direction.y], 
-                                             [(self.vertex1.z - self.vertex2.z), (self.vertex1.z - self.vertex3.z), ray.direction.z] ]))
+                                             [(self.vertex1.x - self.vertex2.x), (self.vertex1.x - self.vertex3.x), ray.direction.x, 0], 
+                                             [(self.vertex1.y - self.vertex2.y), (self.vertex1.y - self.vertex3.y), ray.direction.y, 0], 
+                                             [(self.vertex1.z - self.vertex2.z), (self.vertex1.z - self.vertex3.z), (ray.direction.z ), 0],
+                                             [0, 0, 0, 1] ]))
 
         if beta >= 0:
-            gamma = (self.calculate_determinant([ [(self.vertex1.x - self.vertex2.x), (self.vertex1.x - ray.origin.x), ray.direction.x], 
-                                                  [(self.vertex1.y - self.vertex2.y), (self.vertex1.y - ray.origin.y), ray.direction.y],
-                                                  [(self.vertex1.z - self.vertex2.z), (self.vertex1.z - ray.origin.z), ray.direction.z] ])) / (self.calculate_determinant([
+            gamma = (self.calculate_determinant([ [(self.vertex1.x - self.vertex2.x), (self.vertex1.x - ray.origin.x), ray.direction.x, 0], 
+                                                  [(self.vertex1.y - self.vertex2.y), (self.vertex1.y - ray.origin.y), ray.direction.y, 0],
+                                                  [(self.vertex1.z - self.vertex2.z), (self.vertex1.z - (ray.origin.z )), (ray.direction.z ), 0],
+                                                  [0, 0, 0, 1] ])) / (self.calculate_determinant([
                                                   
-                                                  [(self.vertex1.x - self.vertex2.x), (self.vertex1.x - self.vertex3.x), ray.direction.x], 
-                                                  [(self.vertex1.y - self.vertex2.y), (self.vertex1.y - self.vertex3.y), ray.direction.y], 
-                                                  [(self.vertex1.z - self.vertex2.z), (self.vertex1.z - self.vertex3.z), ray.direction.z] ]))
+                                                  [(self.vertex1.x - self.vertex2.x), (self.vertex1.x - self.vertex3.x), ray.direction.x, 0], 
+                                                  [(self.vertex1.y - self.vertex2.y), (self.vertex1.y - self.vertex3.y), ray.direction.y, 0], 
+                                                  [(self.vertex1.z - self.vertex2.z), (self.vertex1.z - self.vertex3.z), (ray.direction.z ), 0],
+                                                  [0, 0, 0, 1] ]))
+            # alpha = 1.0 - beta - gamma # Not necessary because we already know that if β > 0.0, γ > 0.0 and β + γ < 1.0 the ray intersects the object
+            
+            # Check if ray intersects
+            if beta >= -epsilon and gamma >= -epsilon and (beta + gamma < 1.0 + epsilon):
+                point = self.vertex1 + (self.vertex2 - self.vertex1) * beta + (self.vertex3 - self.vertex1) * gamma
+
+                v = point - ray.origin
+                hit.t = v.calculate_distance()
+                
+                if hit.t >= epsilon and hit.t < hit.t_min:
+                    hit.found = True
+                    hit.material = self.material
+                    hit.point = point
+                    hit.normal = self.calculate_normal()
+                    hit.t_min = hit.t
+                    return True
+
+        return False
+
+
+    def intersect_no_transform(self, ray: Ray, hit: Hit) -> bool: 
+        """
+        Checks if the ray hits the object or not.
+        :param Ray ray: Current ray being analyzed.
+        :param Hit hit: Information about the ray intersection with the current object. If no intersection, hit.found = False, rest is irrelevant.
+        :returns: True if ray intersects current object, False if not
+        :rtype: bool
+        """
+        #return super().intersect(ray, hit)
+        epsilon = 1 * pow(10, -6)
+
+        beta = (self.calculate_determinant([ [(self.vertex1.x - ray.origin.x), (self.vertex1.x - self.vertex3.x), ray.direction.x, 0], 
+                                             [(self.vertex1.y - ray.origin.y), (self.vertex1.y - self.vertex3.y), ray.direction.y, 0], 
+                                             [(self.vertex1.z - ray.origin.z), (self.vertex1.z - self.vertex3.z), ray.direction.z, 0],
+                                             [0, 0, 0, 1] ])) / (self.calculate_determinant([
+                                                
+                                             [(self.vertex1.x - self.vertex2.x), (self.vertex1.x - self.vertex3.x), ray.direction.x, 0], 
+                                             [(self.vertex1.y - self.vertex2.y), (self.vertex1.y - self.vertex3.y), ray.direction.y, 0], 
+                                             [(self.vertex1.z - self.vertex2.z), (self.vertex1.z - self.vertex3.z), ray.direction.z, 0],
+                                             [0, 0, 0, 1] ]))
+
+        if beta >= 0:
+            gamma = (self.calculate_determinant([ [(self.vertex1.x - self.vertex2.x), (self.vertex1.x - ray.origin.x), ray.direction.x, 0], 
+                                                  [(self.vertex1.y - self.vertex2.y), (self.vertex1.y - ray.origin.y), ray.direction.y, 0],
+                                                  [(self.vertex1.z - self.vertex2.z), (self.vertex1.z - ray.origin.z), ray.direction.z, 0],
+                                                  [0, 0, 0, 1] ])) / (self.calculate_determinant([
+                                                  
+                                                  [(self.vertex1.x - self.vertex2.x), (self.vertex1.x - self.vertex3.x), ray.direction.x, 0], 
+                                                  [(self.vertex1.y - self.vertex2.y), (self.vertex1.y - self.vertex3.y), ray.direction.y, 0], 
+                                                  [(self.vertex1.z - self.vertex2.z), (self.vertex1.z - self.vertex3.z), ray.direction.z, 0],
+                                                  [0, 0, 0, 1] ]))
             # alpha = 1.0 - beta - gamma # Not necessary because we already know that if β > 0.0, γ > 0.0 and β + γ < 1.0 the ray intersects the object
             
             # Check if ray intersects
@@ -653,6 +730,7 @@ class TrianglesMesh(Object3D):
             triangle.print_vertices()
 
 
+
 class Box(Object3D):
     """
     Represents a box 3D object. Inherits from base super class "Object3D"
@@ -662,6 +740,83 @@ class Box(Object3D):
 
     def __init__(self, transformation, material):
         super().__init__(transformation, material)
+        self.bounds=[Vector3(-0.5, -0.5, -0.5), Vector3(0.5,0.5,0.5)]
+
+    
+    def intersect(self, ray: Ray, hit: Hit) -> bool:
+        """
+        Checks if the ray hits the object or not.
+        :param Ray ray: Current ray being analyzed.
+        :param Hit hit: Information about the ray intersection with the current object. If no intersection, hit.found = False, rest is irrelevant.
+        :returns: True if ray intersects current object, False if not
+        :rtype: bool
+        """
+        epsilon = 1 * pow(10, -6)
+
+        tnear = -1000
+        tfar = 1000
+
+        minimumCoords = -0.5
+        maximumCoords = 0.5
+
+        # Ray directions and origins
+        Dx = ray.direction.x
+        Rx = ray.origin.x
+        Dy = ray.direction.y
+        Ry = ray.origin.y
+        Dz = ray.direction.z
+        Rz = ray.origin.z
+
+        # Doesn't intersect
+        if Dx == 0:
+            if Rx < minimumCoords or Rx > maximumCoords:
+                return False
+        if Dy == 0:
+            if Ry < minimumCoords or Ry > maximumCoords:
+                return False
+        if Dz == 0:
+            if Rz < minimumCoords or Rz > maximumCoords:
+                return False
+
+        # Intersections
+        txmin = (-0.5 - Rx)/Dx
+        txmax = (0.5 - Rx)/Dx
+        tymin = (-0.5 - Ry)/Dy
+        tymax = (0.5 - Ry)/Dy
+        tzmin = (-0.5 - Rz)/Dz
+        tzmax = (0.5 - Rz)/Dz
+        
+
+
+        # ?????
+        if txmin > tymax or tymin > txmax: return False
+        if tymin > txmin: txmin = tymin   
+        if tymax < txmax: txmax = tymax
+        
+        if txmin > tzmax or tzmin > txmax: return False
+        if tzmin > txmin: txmin = tzmin   
+        if tzmax < txmax: txmax = tzmax
+        # P(T) = R + tnear * D
+
+
+
+        intersectionPoint = Vector3(txmin, tymin, tzmin)
+
+        v = [txmin - ray.origin.x, tymin - ray.origin.y, tzmin - ray.origin.z]
+        distance = np.sqrt(pow(v[0], 2)+ pow(v[1], 2)+ pow(v[2], 2))
+
+        hit.t = distance
+
+        # Intersection is verified
+        if distance > epsilon and hit.t < hit.t_min:
+            hit.found = True
+            hit.material = self.material
+            hit.normal = None
+            hit.point = intersectionPoint
+            return True
+
+        return False
+
 
 
 class Sphere(Object3D):
@@ -673,3 +828,79 @@ class Sphere(Object3D):
 
     def __init__(self, transformation, material):
         super().__init__(transformation, material)
+    
+
+    def intersect(self, ray: Ray, hit: Hit) -> bool:
+        """
+        Checks if the ray hits the object or not.
+        :param Ray ray: Current ray being analyzed.
+        :param Hit hit: Information about the ray intersection with the current object. If no intersection, hit.found = False, rest is irrelevant.
+        :returns: True if ray intersects current object, False if not
+        :rtype: bool
+        """
+        epsilon = 1 * pow(10, -6)
+
+        # Transformations
+        sphereTransformation = Transformation()
+        #sphereTransformation.translate(0, -24, 0)
+        #sphereTransformation.translate(5, 0, 0)
+        #sphereTransformation.scale(6, 6, 6)
+        #sphereTransformation.rotateY(60)
+
+        cameraTransformation = Transformation()
+        #cameraTransformation.translate(0, 0, 10)
+        #cameraTransformation.rotateX(-60)
+        #cameraTransformation.rotateZ(45)
+        #cameraTransformation.transpose_matrix()
+
+
+        # Sphere center
+        sphereCenter = Vector4(0, 0, 0, 1)
+        transformedSphereCenter = sphereTransformation * sphereCenter
+        #print("\n\n\n\n\n", sphereTransformation.matrix, "\n\n", transformedSphereCenter, "\n\n\n\n\n")
+        transformedSphereVector = Vector4(float(transformedSphereCenter[0]), float(transformedSphereCenter[1]), float(transformedSphereCenter[2]), float(transformedSphereCenter[3]))
+
+        # Ray origin
+        origin = Vector4(ray.origin.x, ray.origin.y, ray.origin.z, 1.0)
+        transformedOrigin = cameraTransformation * origin
+        transformedOriginVector = Vector4(float(transformedOrigin[0]), float(transformedOrigin[1]), float(transformedOrigin[2]), float(transformedOrigin[3]))
+
+        # Distance from ray origin to sphere center
+        distanceToCenter = transformedSphereVector - transformedOriginVector
+        distanceToCenter = np.array([distanceToCenter.x, distanceToCenter.y, distanceToCenter.z, 0.0])
+
+        # Ray Direction
+        transformedDirection = cameraTransformation * Vector4(ray.direction.x, ray.direction.y, ray.direction.z, 0.0)
+
+
+        tca = np.dot(distanceToCenter, transformedDirection)
+        discriminant = np.dot(distanceToCenter, distanceToCenter) - tca * tca
+
+        if discriminant < 1: 
+
+            thc = np.sqrt(1 - discriminant)
+            t0 = tca - thc
+            t1 = tca + thc
+    
+            if t1 < epsilon:
+                t0, t1 = [t1, t0]
+
+                if t0 < epsilon: 
+                    return False
+
+            t = t0
+
+            # Check if ray intersects sphere
+            if t >= epsilon and t < hit.t_min:
+                # Intersection point
+                #point = Vector4(float(ray.origin.x + ray.direction.x * t), float(ray.origin.y + ray.direction.y * t), float(ray.origin.z + ray.direction.z * t), 0.0)
+                point = Vector4(float(transformedOriginVector.x + float(transformedDirection[0]) * t), float(transformedOriginVector.y + float(transformedDirection[1]) * t), float(transformedOriginVector.z + float(transformedDirection[2]) * t), 1.0)
+                hit.t = t
+                hit.point = point        
+                hit.t_min = hit.t
+                hit.found = True
+                hit.material = self.material
+                #hit.normal = 
+                return True
+
+        return False
