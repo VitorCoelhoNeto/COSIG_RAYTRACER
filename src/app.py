@@ -408,7 +408,7 @@ def generate_scene_objects(imageContents: dict) -> list:
 
 
 
-def trace_rays(ray: Ray, rec: int, sceneObjects: list) -> Color3:
+def trace_rays(ray: Ray, rec: int, sceneObjects: list, transformList: list) -> Color3:
     """
     Traces the rays, recursively following the path the ray takes and returns a color based on the object intersection.
     :param Ray ray: Ray to be traced.
@@ -418,16 +418,16 @@ def trace_rays(ray: Ray, rec: int, sceneObjects: list) -> Color3:
     """
     hit = Hit(False, Material(Color3(0.0, 0.0, 0.0), 0.0, 0.0, 0.0, 0.0, 1.0), Vector3(0, 0, 0), Vector3(0, 0, 0), 0.0, float(1 * pow(10, 12)))
     for object in sceneObjects: # TODO add them all together by uncommenting box and sphere intersect and removing the if len
-        if isinstance(object, TrianglesMesh): 
-            #if len(object.triangleList) == 128: # Só estamos a fazer para o chão para já, para acelerar os testes
-            #    for triangle in object.triangleList:
-            #        triangle.intersect(ray, hit)
+        if isinstance(object, TrianglesMesh):
+            #if len(object.triangleList) == 6: # Só estamos a fazer para o chão para já, para acelerar os testes
+            for triangle in object.triangleList:
+                triangle.intersect(ray, hit, transformList)
             pass
         if isinstance(object, Box):
             #object.intersect(ray, hit)
             pass
         if isinstance(object, Sphere):
-            object.intersect(ray, hit)
+            object.intersect(ray, hit, transformList)
             pass
 
     if hit.found:
@@ -465,6 +465,44 @@ def preliminar_calculations(camera: Camera, image: Image, sceneObjects: list) ->
     pixelList = list()
     rayList = list()
 
+    # Transformations
+    # Camera
+    cameraTransformation = Transformation()
+    cameraTransformation.translate(0, 0, -74)
+    cameraTransformation.rotateX(-60)
+    cameraTransformation.rotateZ(45)
+    # Sphere
+    sphereTransformation = Transformation()
+    sphereTransformation.translate(0, -24, 0)
+    sphereTransformation.scale(6, 6, 6)
+    finalSphereTransformation = cameraTransformation * sphereTransformation
+    inversefinalSphereTransformation = copy.copy(finalSphereTransformation)
+    inversefinalSphereTransformation.inverse_matrix()
+    transposedFinalSphereTransformation = copy.copy(inversefinalSphereTransformation)
+    transposedFinalSphereTransformation.transpose_matrix()
+    # Box
+    boxTransformation = Transformation()
+    boxTransformation.translate(24, 0, 0)
+    boxTransformation.scale(12, 12, 12)
+    finalBoxTransformation = cameraTransformation * boxTransformation
+    inversefinalBoxTransformation = copy.copy(finalBoxTransformation)
+    inversefinalBoxTransformation.inverse_matrix()
+    transposedFinalBoxTransformation = copy.copy(inversefinalBoxTransformation)
+    transposedFinalBoxTransformation.transpose_matrix()
+    # Triangles
+    trianglesTransformation = Transformation()
+    finalTrianglesTransformation = cameraTransformation * trianglesTransformation
+    inversefinalTrianglesTransformation = copy.copy(finalTrianglesTransformation)
+    inversefinalTrianglesTransformation.inverse_matrix()
+    transposedFinalTrianglesTransformation = copy.copy(inversefinalTrianglesTransformation)
+    transposedFinalTrianglesTransformation.transpose_matrix()
+
+    transformList = list()
+    transformList.append([cameraTransformation])
+    transformList.append([finalSphereTransformation, inversefinalSphereTransformation, transposedFinalSphereTransformation])
+    transformList.append([finalBoxTransformation, inversefinalBoxTransformation, transposedFinalBoxTransformation])
+    transformList.append([finalTrianglesTransformation, inversefinalTrianglesTransformation, transposedFinalTrianglesTransformation])
+
     # For each pixel in the image, generate a ray from the camera to the back of the scene to check if the ray intersects with any scene objects.
     # If it does, return the color of the intersection. With that list of colors (40k), an image will be generated with the calculated colors.
     for j in tqdm(range(image.resolutionY)):
@@ -476,7 +514,7 @@ def preliminar_calculations(camera: Camera, image: Image, sceneObjects: list) ->
             direction = direction.normalize_vector()
             ray = Ray(origin, direction)
             rec = 2
-            color = trace_rays(ray, rec, sceneObjects)
+            color = trace_rays(ray, rec, sceneObjects, transformList)
             color.check_range()
             rayList.append(ray)
             pixelList.append(Color3(float(int(255.0 * color.red)), float(int(255.0 * color.green)), float(int(255.0 * color.blue))))

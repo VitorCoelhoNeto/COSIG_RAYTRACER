@@ -154,5 +154,5 @@ if __name__ == "__main__":
     Main function
     """
     #window()
-    testes()
-    #openGUI()
+    #testes()
+    openGUI()
