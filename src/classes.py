@@ -374,7 +374,8 @@ class Transformation:
             [0, 0,                         0,                            1]
         ])
         self.matrix = matrix@matrix2
-        return matrix@matrix2
+        self.matrix = [list(self.matrix[0]), list(self.matrix[1]), list(self.matrix[2]), list(self.matrix[3])]
+        return self.matrix
 
     def rotateY(self, angle: float):
         """
@@ -390,7 +391,8 @@ class Transformation:
             [0,                            0, 0,                         1]
         ])
         self.matrix = matrix@matrix2
-        return matrix@matrix2
+        self.matrix = [list(self.matrix[0]), list(self.matrix[1]), list(self.matrix[2]), list(self.matrix[3])]
+        return self.matrix
 
     def rotateZ(self, angle: float):
         """
@@ -406,7 +408,8 @@ class Transformation:
             [0,                         0,                            0, 1]
         ])
         self.matrix = matrix@matrix2
-        return matrix@matrix2
+        self.matrix = [list(self.matrix[0]), list(self.matrix[1]), list(self.matrix[2]), list(self.matrix[3])]
+        return self.matrix
 
     def scale(self, x: float, y: float, z: float):
         """
@@ -420,20 +423,33 @@ class Transformation:
         matrix2 = np.array([[x, 0, 0, 0], [0, y, 0, 0],
                            [0, 0, z, 0], [0, 0, 0, 1]])
         self.matrix = matrix@matrix2
-        return matrix@matrix2
+        self.matrix = [list(self.matrix[0]), list(self.matrix[1]), list(self.matrix[2]), list(self.matrix[3])]
+        return self.matrix
 
     def transpose_matrix(self):
         """
-        Returns a transposed version of the matrix. (DOES NOT AFFECT THE MATRIX ITSELF)
+        Returns a transposed version of the matrix.
         """
-        return np.array(self.matrix).transpose()
+        transposed = np.array(self.matrix).transpose()
+        self.matrix =  [[float(transposed[0][0]), float(transposed[0][1]), float(transposed[0][2]), float(transposed[0][3])], 
+                        [float(transposed[1][0]), float(transposed[1][1]), float(transposed[1][2]), float(transposed[1][3])], 
+                        [float(transposed[2][0]), float(transposed[2][1]), float(transposed[2][2]), float(transposed[2][3])], 
+                        [float(transposed[3][0]), float(transposed[3][1]), float(transposed[3][2]), float(transposed[3][3])]]
+        return self.matrix
 
     def inverse_matrix(self):
         """
-        Returns the inverse matrix of the matrix. (DOES NOT AFFECT THE MATRIX ITSELF)
+        Returns the inverse matrix of the matrix.
+        :return: Transposes the matrix
+        :rtype: list
         """
         try:
-            return np.linalg.inv(np.array(self.matrix))
+            inverted = np.linalg.inv(np.array(self.matrix))
+            self.matrix =  [[float(inverted[0][0]), float(inverted[0][1]), float(inverted[0][2]), float(inverted[0][3])], 
+                            [float(inverted[1][0]), float(inverted[1][1]), float(inverted[1][2]), float(inverted[1][3])], 
+                            [float(inverted[2][0]), float(inverted[2][1]), float(inverted[2][2]), float(inverted[2][3])], 
+                            [float(inverted[3][0]), float(inverted[3][1]), float(inverted[3][2]), float(inverted[3][3])]]
+            return self.matrix
         except:
             print("Matrix is singular and cannot be inverted")
     
@@ -448,6 +464,20 @@ class Transformation:
             vec4Multiplication = [vec4.x, vec4.y, vec4.z, vec4.w]
             result = np.matmul(self.matrix, vec4Multiplication)
             return Vector4(float(result[0]), float(result[1]), float(result[2]), float(result[3]))
+
+        if isinstance(vec4, Transformation):
+            matrix = np.array(self.matrix)
+            matrix2 = np.array(vec4.matrix)
+            
+            result = matrix@matrix2
+            #result = [list(result[0]), list(result[1]), list(result[2]), list(result[3])]
+            result = [[float(result[0][0]), float(result[0][1]), float(result[0][2]), float(result[0][3])],
+                      [float(result[1][0]), float(result[1][1]), float(result[1][2]), float(result[1][3])],
+                      [float(result[2][0]), float(result[2][1]), float(result[2][2]), float(result[2][3])],
+                      [float(result[3][0]), float(result[3][1]), float(result[3][2]), float(result[3][3])]]
+            transformedResult = Transformation()
+            transformedResult.matrix = result
+            return transformedResult
 
 
 class Image:
@@ -821,12 +851,14 @@ class Sphere(Object3D):
 
         # Transformations
         sphereTransformation = Transformation()
-        sphereTransformation.translate(2,2,2)
+        #sphereTransformation.translate(0, -24, -74)
+        #sphereTransformation.scale(6, 6, 6)
         sphereCenter = sphereCenter.convert_point3_vector4()
         sphereCenter = sphereTransformation * sphereCenter
+        sphereCenter = sphereCenter.convert_point4_vector3() #TODO
 
-        ray.origin = ray.origin.convert_point3_vector4()
-        ray.direction = ray.direction.convert_vector3_vector4()
+        #ray.origin = ray.origin.convert_point3_vector4()
+        #ray.direction = ray.direction.convert_vector3_vector4()
 
         # Distance from ray origin to sphere center
         originToCenter = sphereCenter - ray.origin

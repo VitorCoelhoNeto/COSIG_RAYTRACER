@@ -97,6 +97,49 @@ def testes():
     #print(np.matmul(sceneObjects[LIST_CAM].transformation.get_matrix(), sceneObjects[LIST_LIG].transformation.get_matrix()), "\n\n")
     #print(np.matmul(sceneObjects[LIST_CAM].transformation.get_matrix(), sceneObjects[LIST_BOX].transformation.get_matrix()), "\n\n")
     #print(np.matmul(sceneObjects[LIST_CAM].transformation.get_matrix(), sceneObjects[LIST_SPH].transformation.get_matrix()), "\n\n")
+
+    # Test Transformation Matrices
+    #cameraTransformation = Transformation()
+    #cameraTransformation.translate(0, 0, -74)
+    #cameraTransformation.rotateX(-60)
+    #cameraTransformation.rotateZ(45)
+    #print()
+    #print("Camera: ", cameraTransformation.matrix, "\n")
+    #
+    #boxTransformation = Transformation()
+    #boxTransformation.translate(24, 0, 0)
+    #boxTransformation.scale(12, 12, 12)
+    #print("Box: ", boxTransformation.matrix, "\n")
+    #
+    #sphereTransformation = Transformation()
+    #sphereTransformation.translate(0, -24, 0)
+    #sphereTransformation.scale(6, 6, 6)
+    #print("Sphere: ", sphereTransformation.matrix, "\n")
+    #
+    #trianglesTransformation = Transformation()
+    #print("Triangles: ", trianglesTransformation.matrix, "\n")
+    #
+    #lightTransformation = Transformation()
+    #lightTransformation.translate(-7, 5, 66)
+    #print("Light: ", lightTransformation.matrix, "\n")
+    
+    # Test transpose and inverse matrix functions
+    #lightTransformation.transpose_matrix()
+    #print(lightTransformation.matrix)
+    #lightTransformation.inverse_matrix()
+    #print(lightTransformation.matrix)
+
+    # Test final matrices, multiplied by camera transformation
+    #finalSphere = cameraTransformation * sphereTransformation
+    #print("Final sphere Matrix: ", finalSphere.matrix, "\n")
+    #print(cameraTransformation.matrix, "\n", sphereTransformation.matrix)
+    #
+    #finalBox = cameraTransformation * boxTransformation
+    #finalTriangles = cameraTransformation * trianglesTransformation
+    #finalLight = cameraTransformation * lightTransformation
+
+
+
     pass
 
 
@@ -111,5 +154,5 @@ if __name__ == "__main__":
     Main function
     """
     #window()
-    #testes()
-    openGUI()
+    testes()
+    #openGUI()
