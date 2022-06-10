@@ -60,7 +60,7 @@ class Vector3:
         print(self.x, self.y, self.z)
 
 
-    def convert_point3_vector4(self): #TODO
+    def convert_point3_vector4(self):
         """
         For a point, converts Cartesian coordinates to Homogeneous coordinates.
         :returns: Converted Vector3 to Vector4 (Point).
@@ -69,7 +69,7 @@ class Vector3:
         return Vector4(self.x, self.y, self.z, 1.0)
 
     
-    def convert_vector3_vector4(self): #TODO
+    def convert_vector3_vector4(self):
         """
         For a vector, converts Cartesian coordinates to Homogeneous coordinates.
         :returns: Converted Vector3 to Vector4 (vector).
@@ -109,8 +109,7 @@ class Vector3:
         """
         mainArray = [self.x, self.y, self.z]
         secondArray = [vector2.x, vector2.y, vector2.z]
-        dotProduct = np.dot(np.array(mainArray), np.array(secondArray))
-        return Vector3(float(dotProduct[0]), float(dotProduct[1]), float(dotProduct[2]))
+        return np.dot(np.array(mainArray), np.array(secondArray))
 
 
     def calculate_vectorial_product(self, vector2):
@@ -212,6 +211,27 @@ class Vector4:
         return Vector3(self.x, self.y, self.z)
 
 
+    def calculate_scalar_product(self, vector2):
+        """
+        Calculates the dot product of two vectors.
+        :param Vector3 vector2: Vector to be calculated with the original vector.
+        :returns: float
+        :rtype: float
+        """
+        mainArray = [self.x, self.y, self.z, self.w]
+        secondArray = [vector2.x, vector2.y, vector2.z, vector2.w]
+        return np.dot(np.array(mainArray), np.array(secondArray))
+
+
+    def calculate_distance(self):
+        """
+        Calculates the distance of a vector.
+        :returns: float
+        :rtype: float
+        """
+        return np.sqrt(pow(self.x, 2) + pow(self.y, 2) + pow(self.z, 2) + pow(self.w, 2))
+
+
     def __sub__(self, vec4):
         """
         Overload of the '-' operation
@@ -242,7 +262,7 @@ class Vector4:
         :rtype: Vector4
         """
         if isinstance(t, float) or isinstance(t, int):
-            return Vector4(self.x * t, self.y * t, self.z * t, self.w * t)
+            return Vector4(float(self.x * t), float(self.y * t), float(self.z * t), float(self.w * t))
     
 
 
@@ -334,9 +354,10 @@ class Transformation:
         matrix = np.array(self.matrix)
         matrix2 = np.array([[1, 0, 0, x], [0, 1, 0, y],
                            [0, 0, 1, z], [0, 0, 0, 1]])
-        #self.matrix = list(matrix.dot(matrix2))
+
         self.matrix = matrix@matrix2
-        return matrix@matrix2 
+        self.matrix = [list(self.matrix[0]), list(self.matrix[1]), list(self.matrix[2]), list(self.matrix[3])]
+        return self.matrix
 
     # TODO Find a workaround to get the exact values of the sines and cosines
     def rotateX(self, angle: float):
@@ -425,7 +446,8 @@ class Transformation:
         """
         if isinstance(vec4, Vector4):
             vec4Multiplication = [vec4.x, vec4.y, vec4.z, vec4.w]
-            return np.matmul(self.matrix, vec4Multiplication)
+            result = np.matmul(self.matrix, vec4Multiplication)
+            return Vector4(float(result[0]), float(result[1]), float(result[2]), float(result[3]))
 
 
 class Image:
@@ -613,7 +635,6 @@ class Triangle(Object3D):
         :returns: True if ray intersects current object, False if not
         :rtype: bool
         """
-        #return super().intersect(ray, hit)
         epsilon = 1 * pow(10, -6)
 
         beta = (self.calculate_determinant([ [(self.vertex1.x - ray.origin.x), (self.vertex1.x - self.vertex3.x), ray.direction.x, 0], 
@@ -635,57 +656,6 @@ class Triangle(Object3D):
                                                   [(self.vertex1.x - self.vertex2.x), (self.vertex1.x - self.vertex3.x), ray.direction.x, 0], 
                                                   [(self.vertex1.y - self.vertex2.y), (self.vertex1.y - self.vertex3.y), ray.direction.y, 0], 
                                                   [(self.vertex1.z - self.vertex2.z), (self.vertex1.z - self.vertex3.z), (ray.direction.z ), 0],
-                                                  [0, 0, 0, 1] ]))
-            # alpha = 1.0 - beta - gamma # Not necessary because we already know that if β > 0.0, γ > 0.0 and β + γ < 1.0 the ray intersects the object
-            
-            # Check if ray intersects
-            if beta >= -epsilon and gamma >= -epsilon and (beta + gamma < 1.0 + epsilon):
-                point = self.vertex1 + (self.vertex2 - self.vertex1) * beta + (self.vertex3 - self.vertex1) * gamma
-
-                v = point - ray.origin
-                hit.t = v.calculate_distance()
-                
-                if hit.t >= epsilon and hit.t < hit.t_min:
-                    hit.found = True
-                    hit.material = self.material
-                    hit.point = point
-                    hit.normal = self.calculate_normal()
-                    hit.t_min = hit.t
-                    return True
-
-        return False
-
-
-    def intersect_no_transform(self, ray: Ray, hit: Hit) -> bool: 
-        """
-        Checks if the ray hits the object or not.
-        :param Ray ray: Current ray being analyzed.
-        :param Hit hit: Information about the ray intersection with the current object. If no intersection, hit.found = False, rest is irrelevant.
-        :returns: True if ray intersects current object, False if not
-        :rtype: bool
-        """
-        #return super().intersect(ray, hit)
-        epsilon = 1 * pow(10, -6)
-
-        beta = (self.calculate_determinant([ [(self.vertex1.x - ray.origin.x), (self.vertex1.x - self.vertex3.x), ray.direction.x, 0], 
-                                             [(self.vertex1.y - ray.origin.y), (self.vertex1.y - self.vertex3.y), ray.direction.y, 0], 
-                                             [(self.vertex1.z - ray.origin.z), (self.vertex1.z - self.vertex3.z), ray.direction.z, 0],
-                                             [0, 0, 0, 1] ])) / (self.calculate_determinant([
-                                                
-                                             [(self.vertex1.x - self.vertex2.x), (self.vertex1.x - self.vertex3.x), ray.direction.x, 0], 
-                                             [(self.vertex1.y - self.vertex2.y), (self.vertex1.y - self.vertex3.y), ray.direction.y, 0], 
-                                             [(self.vertex1.z - self.vertex2.z), (self.vertex1.z - self.vertex3.z), ray.direction.z, 0],
-                                             [0, 0, 0, 1] ]))
-
-        if beta >= 0:
-            gamma = (self.calculate_determinant([ [(self.vertex1.x - self.vertex2.x), (self.vertex1.x - ray.origin.x), ray.direction.x, 0], 
-                                                  [(self.vertex1.y - self.vertex2.y), (self.vertex1.y - ray.origin.y), ray.direction.y, 0],
-                                                  [(self.vertex1.z - self.vertex2.z), (self.vertex1.z - ray.origin.z), ray.direction.z, 0],
-                                                  [0, 0, 0, 1] ])) / (self.calculate_determinant([
-                                                  
-                                                  [(self.vertex1.x - self.vertex2.x), (self.vertex1.x - self.vertex3.x), ray.direction.x, 0], 
-                                                  [(self.vertex1.y - self.vertex2.y), (self.vertex1.y - self.vertex3.y), ray.direction.y, 0], 
-                                                  [(self.vertex1.z - self.vertex2.z), (self.vertex1.z - self.vertex3.z), ray.direction.z, 0],
                                                   [0, 0, 0, 1] ]))
             # alpha = 1.0 - beta - gamma # Not necessary because we already know that if β > 0.0, γ > 0.0 and β + γ < 1.0 the ray intersects the object
             
@@ -845,14 +815,27 @@ class Sphere(Object3D):
         """
         epsilon = 1 * pow(10, -6)
 
+        # Sphere center and radius
+        sphereCenter = Vector3(0, 0, 0)
+        radius = 1
+
+        # Transformations
+        sphereTransformation = Transformation()
+        sphereTransformation.translate(2,2,2)
+        sphereCenter = sphereCenter.convert_point3_vector4()
+        sphereCenter = sphereTransformation * sphereCenter
+
+        ray.origin = ray.origin.convert_point3_vector4()
+        ray.direction = ray.direction.convert_vector3_vector4()
+
         # Distance from ray origin to sphere center
-        originToCenter = Vector3(0, 0 ,0) - ray.origin
+        originToCenter = sphereCenter - ray.origin
 
         # Dot product between distance from ray origin to sphere center and ray direction
-        v = Vector3(originToCenter.x, originToCenter.y, originToCenter.z).calculate_scalar_product(ray.direction)
+        v = originToCenter.calculate_scalar_product(ray.direction)
 
         # Discriminant
-        discriminant = pow(1, 2) - (originToCenter.calculate_scalar_product(originToCenter) - (v * v))
+        discriminant = pow(radius, 2) - (originToCenter.calculate_scalar_product(originToCenter) - (v * v))
 
         if discriminant < 0:
             # No intersection
@@ -869,11 +852,11 @@ class Sphere(Object3D):
 
             # And check if it is smaller than the lowest distance and also epsilon
             if hit.t >= epsilon and hit.t < hit.t_min:
-                hit.t = distance.calculate_distance()
-                hit.point = point        
-                hit.t_min = hit.t
                 hit.found = True
+                hit.t_min = hit.t
+                hit.point = point        
                 hit.material = self.material
                 hit.normal = None
                 return True
+
             return False

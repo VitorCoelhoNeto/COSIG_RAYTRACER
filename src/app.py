@@ -474,8 +474,7 @@ def preliminar_calculations(camera: Camera, image: Image, sceneObjects: list) ->
             pixelZ = 0
             direction = Vector3(float(pixelX), float(pixelY), -float(camDistance))
             direction = direction.normalize_vector()
-            directionVector = Vector3(float(direction[0]), float(direction[1]), float(direction[2]))
-            ray = Ray(origin, directionVector)
+            ray = Ray(origin, direction)
             rec = 2
             color = trace_rays(ray, rec, sceneObjects)
             color.check_range()
