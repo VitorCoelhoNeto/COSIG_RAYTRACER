@@ -627,6 +627,8 @@ class Material:
         self.specular = specular
         self.refraction = refraction
         self.refractionIndex = refractionIndex
+        self.ambientColor = self.color * self.ambient
+        self.diffuseColor = self.color * self.diffuse
     
     
     def print_material(self):
