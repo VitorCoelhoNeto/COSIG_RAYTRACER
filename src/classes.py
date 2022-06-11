@@ -716,6 +716,9 @@ class Triangle(Object3D):
                 point = self.vertex1 + (self.vertex2 - self.vertex1) * beta + (self.vertex3 - self.vertex1) * gamma
 
                 # (Step 3) Convert point to homogenoeus coordinates (object coordinates), transform it, and bring it back to world coordinates (cartesian coordinates)
+                # Calculate normal and apply transformation before applying the transformation to the intersection point
+                normal =  self.calculate_normal()#Calcular a normal N’ à superfície do objecto i no ponto P’ de intersecção
+
                 point = point.convert_point3_vector4()
                 point = transformList[T][FINAL] * point
                 point = point.convert_point4_vector3()
@@ -723,12 +726,19 @@ class Triangle(Object3D):
                 v = point - triangleRay.origin
                 hit.t = v.calculate_distance()
                 
-                if hit.t >= epsilon and hit.t < hit.t_min: #TODO Triangles check hit returns
+                if hit.t >= epsilon and hit.t < hit.t_min:
+                    
+                    # Transform normal
+                    normal = normal.convert_vector3_vector4()
+                    normal = transformList[T][TRAN] * normal
+                    normal = normal.convert_vector4_vector3()
+                    normal = normal.normalize_vector()
+
                     hit.found = True
+                    hit.t_min = hit.t
                     hit.material = self.material
                     hit.point = point
-                    #hit.normal = self.calculate_normal() 
-                    hit.t_min = hit.t
+                    hit.normal = normal
                     return True
 
         return False
@@ -775,7 +785,7 @@ class Box(Object3D):
         self.bounds=[Vector3(-0.5, -0.5, -0.5), Vector3(0.5,0.5,0.5)]
 
     
-    def intersect(self, boxRay: Ray, hit: Hit) -> bool: #TODO Box transformations
+    def intersect(self, boxRay: Ray, hit: Hit, transformList: list) -> bool: # TODO Box transformations
         """
         Checks if the ray hits the object or not.
         :param Ray ray: Current ray being analyzed.
@@ -821,29 +831,50 @@ class Box(Object3D):
 
 
         # ?????
-        if txmin > tymax or tymin > txmax: return False
-        if tymin > txmin: txmin = tymin   
-        if tymax < txmax: txmax = tymax
+        if txmin > tymax or tymin > txmax: 
+            return False
+        if tymin > txmin: 
+            txmin = tymin   
+        if tymax < txmax: 
+            txmax = tymax
         
-        if txmin > tzmax or tzmin > txmax: return False
-        if tzmin > txmin: txmin = tzmin   
-        if tzmax < txmax: txmax = tzmax
+        if txmin > tzmax or tzmin > txmax: 
+            return False
+        if tzmin > txmin: 
+            txmin = tzmin   
+        if tzmax < txmax: 
+            txmax = tzmax
         # P(T) = R + tnear * D
 
 
 
         intersectionPoint = Vector3(txmin, tymin, tzmin)
 
-        v = [txmin - boxRay.origin.x, tymin - boxRay.origin.y, tzmin - boxRay.origin.z]
-        distance = np.sqrt(pow(v[0], 2)+ pow(v[1], 2)+ pow(v[2], 2))
+        # (Step 3) Convert point to homogenoeus coordinates (object coordinates), transform it, and bring it back to world coordinates (cartesian coordinates)     
+        # Calculate normal and apply transformation before transforming the intersection point
+        normal =  Vector3(0, 0, 0) # TODO Calculate box normal
 
-        hit.t = distance
+        intersectionPoint = intersectionPoint.convert_point3_vector4()
+        intersectionPoint = transformList[B][FINAL] * intersectionPoint
+        intersectionPoint = intersectionPoint.convert_point4_vector3()
+
+        # Calculate distance
+        distance = intersectionPoint - boxRay.origin
+        hit.t = distance.calculate_distance()
 
         # Intersection is verified
-        if distance > epsilon and hit.t < hit.t_min:
+        if hit.t >= epsilon and hit.t < hit.t_min:
+
+            # Transform normal
+            normal = normal.convert_vector3_vector4()
+            normal = transformList[T][TRAN] * normal
+            normal = normal.convert_vector4_vector3()
+            normal = normal.normalize_vector()
+
             hit.found = True
+            hit.t_min = hit.t
             hit.material = self.material
-            hit.normal = None
+            hit.normal = normal
             hit.point = intersectionPoint
             return True
 
@@ -896,7 +927,9 @@ class Sphere(Object3D):
             d = np.sqrt(discriminant)
             point = sphereRay.origin + (sphereRay.direction * (v - d))
             
-            # (Step 3) Convert point to homogenoeus coordinates (object coordinates), transform it, and bring it back to world coordinates (cartesian coordinates) 
+            # (Step 3) Convert point to homogenoeus coordinates (object coordinates), transform it, and bring it back to world coordinates (cartesian coordinates)
+            # Calculate normal and apply transformation before transforming the intersection point
+            normal =  Vector3(0, 0, 0) # TODO Calculate sphere normal
             point = point.convert_point3_vector4()
             point = transformList[S][FINAL] * point
             point = point.convert_point4_vector3()
@@ -906,12 +939,18 @@ class Sphere(Object3D):
             hit.t = distance.calculate_distance()
 
             # And check if it is smaller than the lowest distance and also epsilon
-            if hit.t >= epsilon and hit.t < hit.t_min: #TODO Sphere check hit returns
+            if hit.t >= epsilon and hit.t < hit.t_min:
+                # Transform normal
+                normal = normal.convert_vector3_vector4()
+                normal = transformList[T][TRAN] * normal
+                normal = normal.convert_vector4_vector3()
+                normal = normal.normalize_vector()
+
                 hit.found = True
                 hit.t_min = hit.t
                 hit.point = point        
                 hit.material = self.material
-                hit.normal = None
+                hit.normal = normal
                 return True
 
             return False

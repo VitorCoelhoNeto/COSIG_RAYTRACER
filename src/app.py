@@ -427,19 +427,19 @@ def trace_rays(ray: Ray, rec: int, sceneObjects: list, transformList: list, tria
     hit = Hit(False, Material(Color3(0.0, 0.0, 0.0), 0.0, 0.0, 0.0, 0.0, 1.0), Vector3(0, 0, 0), Vector3(0, 0, 0), 0.0, float(1 * pow(10, 12)))
     for object in sceneObjects: # TODO add them all together by uncommenting box and sphere intersect and removing the if len
         if isinstance(object, TrianglesMesh):
-            #if len(object.triangleList) == 6: # Só estamos a fazer para o chão para já, para acelerar os testes
-            for triangle in object.triangleList:
-                triangle.intersect(triangleRay, hit, transformList)
+            if len(object.triangleList) == 6: # Só estamos a fazer para o chão para já, para acelerar os testes
+                for triangle in object.triangleList:
+                    triangle.intersect(triangleRay, hit, transformList)
             pass
         if isinstance(object, Box):
-            #object.intersect(boxRay, hit)
+            #object.intersect(boxRay, hit, transformList)
             pass
         if isinstance(object, Sphere):
-            object.intersect(sphereRay, hit, transformList)
+            #object.intersect(sphereRay, hit, transformList)
             pass
 
     if hit.found:
-        # If the ray intersects an object, paint the pixel with the nearest scene object material color         
+        # If the ray intersects an object, paint the pixel with the nearest scene object material color
         return hit.material.color
     else:
         # If the ray hits no scene objects, paint the pixel with the background color (Black)
@@ -523,7 +523,7 @@ def preliminar_calculations(camera: Camera, image: Image, sceneObjects: list) ->
             direction = direction.normalize_vector()
             ray = Ray(origin, direction)
 
-            # Ray copy for the triangles
+            # (Step 1) Ray copy for the triangles. Transforming the ray
             triangleRay = copy.copy(ray)
             triangleRay.origin = triangleRay.origin.convert_point3_vector4()
             triangleRay.origin = transformList[T][INV] * triangleRay.origin
@@ -533,7 +533,7 @@ def preliminar_calculations(camera: Camera, image: Image, sceneObjects: list) ->
             triangleRay.direction = triangleRay.direction.convert_vector4_vector3()
             triangleRay.direction = triangleRay.direction.normalize_vector()
 
-            # Ray copy for the Sphere
+            # (Step 1) Ray copy for the Sphere. Transforming the ray
             sphereRay = copy.copy(ray)
             sphereRay.origin = sphereRay.origin.convert_point3_vector4()
             sphereRay.origin = transformList[S][INV] * sphereRay.origin
@@ -543,7 +543,7 @@ def preliminar_calculations(camera: Camera, image: Image, sceneObjects: list) ->
             sphereRay.direction = sphereRay.direction.convert_vector4_vector3()
             sphereRay.direction = sphereRay.direction.normalize_vector()
 
-            # Ray copy for the Box
+            # (Step 1) Ray copy for the Box. Transforming the ray
             boxRay = copy.copy(ray)
             boxRay.origin = boxRay.origin.convert_point3_vector4()
             boxRay.origin = transformList[B][INV] * boxRay.origin
