@@ -1,5 +1,12 @@
 import numpy as np
-import copy
+
+C = 0
+S = 1
+B = 2
+T = 3
+FINAL= 0
+INV  = 1
+TRAN = 2
 
 class Color3:
     """
@@ -671,7 +678,7 @@ class Triangle(Object3D):
         return normal.normalize_vector()
     
 
-    def intersect(self, ray: Ray, hit: Hit, transformList: list) -> bool: #TODO Triangle Transformations
+    def intersect(self, triangleRay: Ray, hit: Hit, transformList: list) -> bool:
         """
         Checks if the ray hits the object or not.
         :param Ray ray: Current ray being analyzed.
@@ -679,44 +686,28 @@ class Triangle(Object3D):
         :returns: True if ray intersects current object, False if not
         :rtype: bool
         """
-        C = 0
-        S = 1
-        B = 2
-        T = 3
-        FINAL= 0
-        INV  = 1
-        TRAN = 2
         epsilon = 1 * pow(10, -6)
-        rayCopy = copy.copy(ray)
-        rayCopy.origin = rayCopy.origin.convert_point3_vector4()
-        rayCopy.origin = transformList[T][INV] * rayCopy.origin
-        rayCopy.origin = rayCopy.origin.convert_point4_vector3()
 
-        rayCopy.direction = rayCopy.direction.convert_vector3_vector4()
-        rayCopy.direction = transformList[T][INV] * rayCopy.direction
-        rayCopy.direction = rayCopy.direction.convert_vector4_vector3()
-        rayCopy.direction = rayCopy.direction.normalize_vector()
-
-
-        beta = (self.calculate_determinant([ [(self.vertex1.x - rayCopy.origin.x),    (self.vertex1.x - self.vertex3.x), rayCopy.direction.x, 0], 
-                                             [(self.vertex1.y - rayCopy.origin.y),    (self.vertex1.y - self.vertex3.y), rayCopy.direction.y, 0], 
-                                             [(self.vertex1.z - (rayCopy.origin.z )), (self.vertex1.z - self.vertex3.z), rayCopy.direction.z, 0],
+        # (Step 2) Calculate point if there is an intersection point between the triangleRay and the current object
+        beta = (self.calculate_determinant([ [(self.vertex1.x - triangleRay.origin.x),    (self.vertex1.x - self.vertex3.x), triangleRay.direction.x, 0], 
+                                             [(self.vertex1.y - triangleRay.origin.y),    (self.vertex1.y - self.vertex3.y), triangleRay.direction.y, 0], 
+                                             [(self.vertex1.z - (triangleRay.origin.z )), (self.vertex1.z - self.vertex3.z), triangleRay.direction.z, 0],
                                              [0,                                  0,                                 0,               1] ])) / (self.calculate_determinant([
                                                 
-                                             [(self.vertex1.x - self.vertex2.x), (self.vertex1.x - self.vertex3.x), rayCopy.direction.x, 0], 
-                                             [(self.vertex1.y - self.vertex2.y), (self.vertex1.y - self.vertex3.y), rayCopy.direction.y, 0], 
-                                             [(self.vertex1.z - self.vertex2.z), (self.vertex1.z - self.vertex3.z), rayCopy.direction.z, 0],
+                                             [(self.vertex1.x - self.vertex2.x), (self.vertex1.x - self.vertex3.x), triangleRay.direction.x, 0], 
+                                             [(self.vertex1.y - self.vertex2.y), (self.vertex1.y - self.vertex3.y), triangleRay.direction.y, 0], 
+                                             [(self.vertex1.z - self.vertex2.z), (self.vertex1.z - self.vertex3.z), triangleRay.direction.z, 0],
                                              [0,                                 0,                                 0,               1] ]))
 
         if beta >= 0:
-            gamma = (self.calculate_determinant([ [(self.vertex1.x - self.vertex2.x), (self.vertex1.x - rayCopy.origin.x), rayCopy.direction.x, 0], 
-                                                  [(self.vertex1.y - self.vertex2.y), (self.vertex1.y - rayCopy.origin.y), rayCopy.direction.y, 0],
-                                                  [(self.vertex1.z - self.vertex2.z), (self.vertex1.z - rayCopy.origin.z), rayCopy.direction.z, 0],
+            gamma = (self.calculate_determinant([ [(self.vertex1.x - self.vertex2.x), (self.vertex1.x - triangleRay.origin.x), triangleRay.direction.x, 0], 
+                                                  [(self.vertex1.y - self.vertex2.y), (self.vertex1.y - triangleRay.origin.y), triangleRay.direction.y, 0],
+                                                  [(self.vertex1.z - self.vertex2.z), (self.vertex1.z - triangleRay.origin.z), triangleRay.direction.z, 0],
                                                   [0,                                 0,                               0,               1] ])) / (self.calculate_determinant([
                                                   
-                                                  [(self.vertex1.x - self.vertex2.x), (self.vertex1.x - self.vertex3.x), rayCopy.direction.x, 0], 
-                                                  [(self.vertex1.y - self.vertex2.y), (self.vertex1.y - self.vertex3.y), rayCopy.direction.y, 0], 
-                                                  [(self.vertex1.z - self.vertex2.z), (self.vertex1.z - self.vertex3.z), rayCopy.direction.z, 0],
+                                                  [(self.vertex1.x - self.vertex2.x), (self.vertex1.x - self.vertex3.x), triangleRay.direction.x, 0], 
+                                                  [(self.vertex1.y - self.vertex2.y), (self.vertex1.y - self.vertex3.y), triangleRay.direction.y, 0], 
+                                                  [(self.vertex1.z - self.vertex2.z), (self.vertex1.z - self.vertex3.z), triangleRay.direction.z, 0],
                                                   [0,                                 0,                                 0,               1] ]))
             # alpha = 1.0 - beta - gamma # Not necessary because we already know that if β > 0.0, γ > 0.0 and β + γ < 1.0 the ray intersects the object
             
@@ -724,18 +715,19 @@ class Triangle(Object3D):
             if beta >= -epsilon and gamma >= -epsilon and (beta + gamma < 1.0 + epsilon):
                 point = self.vertex1 + (self.vertex2 - self.vertex1) * beta + (self.vertex3 - self.vertex1) * gamma
 
+                # (Step 3) Convert point to homogenoeus coordinates (object coordinates), transform it, and bring it back to world coordinates (cartesian coordinates)
                 point = point.convert_point3_vector4()
                 point = transformList[T][FINAL] * point
                 point = point.convert_point4_vector3()
 
-                v = point - rayCopy.origin
+                v = point - triangleRay.origin
                 hit.t = v.calculate_distance()
                 
-                if hit.t >= epsilon and hit.t < hit.t_min:
+                if hit.t >= epsilon and hit.t < hit.t_min: #TODO Triangles check hit returns
                     hit.found = True
                     hit.material = self.material
                     hit.point = point
-                    #hit.normal = self.calculate_normal() #TODO
+                    #hit.normal = self.calculate_normal() 
                     hit.t_min = hit.t
                     return True
 
@@ -783,7 +775,7 @@ class Box(Object3D):
         self.bounds=[Vector3(-0.5, -0.5, -0.5), Vector3(0.5,0.5,0.5)]
 
     
-    def intersect(self, ray: Ray, hit: Hit) -> bool: #TODO Box transformations
+    def intersect(self, boxRay: Ray, hit: Hit) -> bool: #TODO Box transformations
         """
         Checks if the ray hits the object or not.
         :param Ray ray: Current ray being analyzed.
@@ -800,12 +792,12 @@ class Box(Object3D):
         maximumCoords = 0.5
 
         # Ray directions and origins
-        Dx = ray.direction.x
-        Rx = ray.origin.x
-        Dy = ray.direction.y
-        Ry = ray.origin.y
-        Dz = ray.direction.z
-        Rz = ray.origin.z
+        Dx = boxRay.direction.x
+        Rx = boxRay.origin.x
+        Dy = boxRay.direction.y
+        Ry = boxRay.origin.y
+        Dz = boxRay.direction.z
+        Rz = boxRay.origin.z
 
         # Doesn't intersect
         if Dx == 0:
@@ -842,7 +834,7 @@ class Box(Object3D):
 
         intersectionPoint = Vector3(txmin, tymin, tzmin)
 
-        v = [txmin - ray.origin.x, tymin - ray.origin.y, tzmin - ray.origin.z]
+        v = [txmin - boxRay.origin.x, tymin - boxRay.origin.y, tzmin - boxRay.origin.z]
         distance = np.sqrt(pow(v[0], 2)+ pow(v[1], 2)+ pow(v[2], 2))
 
         hit.t = distance
@@ -870,7 +862,7 @@ class Sphere(Object3D):
         super().__init__(transformation, material)
     
 
-    def intersect(self, ray: Ray, hit: Hit, transformList:list) -> bool: #TODO Sphere transformations
+    def intersect(self, sphereRay: Ray, hit: Hit, transformList:list) -> bool:
         """
         Calculates if a ray hits a sphere or not.
         :param Ray ray: Current ray being cast.
@@ -878,35 +870,19 @@ class Sphere(Object3D):
         :returns: Wether the ray intersects the sphere or not.
         :rtype: bool
         """
-        C = 0
-        S = 1
-        B = 2
-        FINAL= 0
-        INV  = 1
-        TRAN = 2
         epsilon = 1 * pow(10, -6)
-        rayCopy = copy.copy(ray)
 
         # Sphere center and radius
         sphereCenter = Vector3(0, 0, 0)
         radius = 1
-
-        # Transform sphere center point
-        sphereCenter = sphereCenter.convert_point3_vector4()
-        #sphereCenter = transformList[S][FINAL] * sphereCenter
-        #sphereCenter = sphereCenter.convert_point4_vector3()
-
-        rayCopy.origin = rayCopy.origin.convert_point3_vector4()
-        rayCopy.origin = transformList[S][INV] * rayCopy.origin
-        rayCopy.direction = rayCopy.direction.convert_vector3_vector4()
-        rayCopy.direction = transformList[S][INV] * rayCopy.direction
-        rayCopy.direction = rayCopy.direction.normalize_vector()
+        
+        # (Step 2) Calculate point if there is an intersection point between the sphereRay and the current object
 
         # Distance from ray origin to sphere center
-        originToCenter = sphereCenter - rayCopy.origin
+        originToCenter = sphereCenter - sphereRay.origin
 
         # Dot product between distance from ray origin to sphere center and ray direction
-        v = originToCenter.calculate_scalar_product(rayCopy.direction)
+        v = originToCenter.calculate_scalar_product(sphereRay.direction)
 
         # Discriminant
         discriminant = pow(radius, 2) - (originToCenter.calculate_scalar_product(originToCenter) - (v * v))
@@ -918,20 +894,19 @@ class Sphere(Object3D):
 
             # If it intersects, we calculate the intersection point
             d = np.sqrt(discriminant)
-            point = rayCopy.origin + (rayCopy.direction * (v - d))
+            point = sphereRay.origin + (sphereRay.direction * (v - d))
             
-            rayCopy.origin = rayCopy.origin.convert_point4_vector3()
-
+            # (Step 3) Convert point to homogenoeus coordinates (object coordinates), transform it, and bring it back to world coordinates (cartesian coordinates) 
+            point = point.convert_point3_vector4()
             point = transformList[S][FINAL] * point
-
             point = point.convert_point4_vector3()
 
             # Then the distance from the camera to the intersection point
-            distance = point - rayCopy.origin
+            distance = point - sphereRay.origin
             hit.t = distance.calculate_distance()
 
             # And check if it is smaller than the lowest distance and also epsilon
-            if hit.t >= epsilon and hit.t < hit.t_min:
+            if hit.t >= epsilon and hit.t < hit.t_min: #TODO Sphere check hit returns
                 hit.found = True
                 hit.t_min = hit.t
                 hit.point = point        

@@ -1,10 +1,18 @@
 import sys
 import json
 import re
+import copy
 from tqdm import tqdm
 from raytracerGUI  import *
 from classes import *
 
+C = 0
+S = 1
+B = 2
+T = 3
+FINAL= 0
+INV  = 1
+TRAN = 2
 
 def window():
     """
@@ -408,7 +416,7 @@ def generate_scene_objects(imageContents: dict) -> list:
 
 
 
-def trace_rays(ray: Ray, rec: int, sceneObjects: list, transformList: list) -> Color3:
+def trace_rays(ray: Ray, rec: int, sceneObjects: list, transformList: list, triangleRay: Ray, sphereRay: Ray, boxRay: Ray) -> Color3:
     """
     Traces the rays, recursively following the path the ray takes and returns a color based on the object intersection.
     :param Ray ray: Ray to be traced.
@@ -421,13 +429,13 @@ def trace_rays(ray: Ray, rec: int, sceneObjects: list, transformList: list) -> C
         if isinstance(object, TrianglesMesh):
             #if len(object.triangleList) == 6: # Só estamos a fazer para o chão para já, para acelerar os testes
             for triangle in object.triangleList:
-                triangle.intersect(ray, hit, transformList)
+                triangle.intersect(triangleRay, hit, transformList)
             pass
         if isinstance(object, Box):
-            #object.intersect(ray, hit)
+            #object.intersect(boxRay, hit)
             pass
         if isinstance(object, Sphere):
-            object.intersect(ray, hit, transformList)
+            object.intersect(sphereRay, hit, transformList)
             pass
 
     if hit.found:
@@ -505,6 +513,7 @@ def preliminar_calculations(camera: Camera, image: Image, sceneObjects: list) ->
 
     # For each pixel in the image, generate a ray from the camera to the back of the scene to check if the ray intersects with any scene objects.
     # If it does, return the color of the intersection. With that list of colors (40k), an image will be generated with the calculated colors.
+
     for j in tqdm(range(image.resolutionY)):
         for i in range(image.resolutionX):
             pixelX = (i + 0.5) * pixelSize - width / 2.0
@@ -513,8 +522,39 @@ def preliminar_calculations(camera: Camera, image: Image, sceneObjects: list) ->
             direction = Vector3(float(pixelX), float(pixelY), -float(camDistance))
             direction = direction.normalize_vector()
             ray = Ray(origin, direction)
+
+            # Ray copy for the triangles
+            triangleRay = copy.copy(ray)
+            triangleRay.origin = triangleRay.origin.convert_point3_vector4()
+            triangleRay.origin = transformList[T][INV] * triangleRay.origin
+            triangleRay.origin = triangleRay.origin.convert_point4_vector3()
+            triangleRay.direction = triangleRay.direction.convert_vector3_vector4()
+            triangleRay.direction = transformList[T][INV] * triangleRay.direction
+            triangleRay.direction = triangleRay.direction.convert_vector4_vector3()
+            triangleRay.direction = triangleRay.direction.normalize_vector()
+
+            # Ray copy for the Sphere
+            sphereRay = copy.copy(ray)
+            sphereRay.origin = sphereRay.origin.convert_point3_vector4()
+            sphereRay.origin = transformList[S][INV] * sphereRay.origin
+            sphereRay.origin = sphereRay.origin.convert_point4_vector3()
+            sphereRay.direction = sphereRay.direction.convert_vector3_vector4()
+            sphereRay.direction = transformList[S][INV] * sphereRay.direction
+            sphereRay.direction = sphereRay.direction.convert_vector4_vector3()
+            sphereRay.direction = sphereRay.direction.normalize_vector()
+
+            # Ray copy for the Box
+            boxRay = copy.copy(ray)
+            boxRay.origin = boxRay.origin.convert_point3_vector4()
+            boxRay.origin = transformList[B][INV] * boxRay.origin
+            boxRay.origin = boxRay.origin.convert_point4_vector3()
+            boxRay.direction = boxRay.direction.convert_vector3_vector4()
+            boxRay.direction = transformList[B][INV] * boxRay.direction
+            boxRay.direction = boxRay.direction.convert_vector4_vector3()
+            boxRay.direction = boxRay.direction.normalize_vector()
+
             rec = 2
-            color = trace_rays(ray, rec, sceneObjects, transformList)
+            color = trace_rays(ray, rec, sceneObjects, transformList, triangleRay, sphereRay, boxRay)
             color.check_range()
             rayList.append(ray)
             pixelList.append(Color3(float(int(255.0 * color.red)), float(int(255.0 * color.green)), float(int(255.0 * color.blue))))
