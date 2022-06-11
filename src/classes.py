@@ -964,7 +964,7 @@ class Sphere(Object3D):
             
             # (Step 3) Convert point to homogenoeus coordinates (object coordinates), transform it, and bring it back to world coordinates (cartesian coordinates)
             # Calculate normal and apply transformation before transforming the intersection point
-            normal =  Vector3(0, 0, 0) # TODO Calculate sphere normal
+            normal =  Vector3(1, 1, 1) # TODO Calculate sphere normal
             point = point.convert_point3_vector4()
             point = transformList[S][FINAL] * point
             point = point.convert_point4_vector3()

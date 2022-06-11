@@ -1,37 +1,19 @@
-12-05-2022 -> 18-05-2022
-UI:
-    -Done
-Classes:
-    -Done
-Parser:
-    -Done
-Normal Calculation:
-    -Done
+Assignments 1-4:
+- Box intersection revision. 
+    - classes.py -> class Box -> intersect function
 
+- Box and Sphere normal calculation. 
+    - classes.py -> class Box and Sphere -> calculate_normal function
 
+- Checking if triangles' normals are calculated properly. 
+    - classes.py -> class Triangle -> calculate_normal function
 
-18-05-2022 -> 24-05-2022
-Ray tracing:
-    -Done
-Image Coloring:
-    -Color the image with the pixels on the pixel list
+- Checking light position for diffuse lighting. 
+    - app.py -> trace_rays function
 
+- Remake UI.
+    - Remake raytracerGUI to do what testingUI does, but with more features.
 
+- Optimization.
 
-25-05-2022 -> 31-05-2022
-Trace_rays function (called for each pixel, each ray), returns a Color3:
-    -Done
-Intersect function:
-    -Calculate Barymetric Coordinates:
-        -Done
-    -Check if ray intersects or not the object (Hit.found = False if not, else, change Hit parameters)
-        -Done
-    -Return hit color
-        -Done
-    -Test pixel colors
-        -Done
-    -Do the intersect function for the box and the sphere
-        -
-
-
-01-06-2022 -> 07-06-2022
+- Assignments 5-7

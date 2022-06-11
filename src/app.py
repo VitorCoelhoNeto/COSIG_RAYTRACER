@@ -10,6 +10,7 @@ C = 0
 S = 1
 B = 2
 T = 3
+L = 4
 FINAL= 0
 INV  = 1
 TRAN = 2
@@ -427,15 +428,15 @@ def trace_rays(ray: Ray, rec: int, sceneObjects: list, transformList: list, tria
     hit = Hit(False, Material(Color3(0.0, 0.0, 0.0), 0.0, 0.0, 0.0, 0.0, 1.0), Vector3(0, 0, 0), Vector3(0, 0, 0), 0.0, float(1 * pow(10, 12)))
     for object in sceneObjects: # TODO add them all together by uncommenting box and sphere intersect and removing the if len
         if isinstance(object, TrianglesMesh):
-            if len(object.triangleList) == 6: # Só estamos a fazer para o chão para já, para acelerar os testes
-                for triangle in object.triangleList:
-                    triangle.intersect(triangleRay, hit, transformList)
+            #if len(object.triangleList) == 6: # Só estamos a fazer para o chão para já, para acelerar os testes
+            for triangle in object.triangleList:
+                triangle.intersect(triangleRay, hit, transformList)
             pass
         if isinstance(object, Box):
             #object.intersect(boxRay, hit, transformList)
             pass
         if isinstance(object, Sphere):
-            #object.intersect(sphereRay, hit, transformList)
+            object.intersect(sphereRay, hit, transformList)
             pass
 
     if hit.found:
@@ -444,6 +445,21 @@ def trace_rays(ray: Ray, rec: int, sceneObjects: list, transformList: list, tria
         for light in sceneObjects[2]:
             # Calculate color with light interference
             color = color + ((light.color * hit.material.color) * hit.material.ambient)
+
+            # Calculate distance from intersection point and light source
+            lightPosition = Vector3(0, 0, 0)
+            lightPosition = lightPosition.convert_point3_vector4() # TODO
+            lightPosition = transformList[L][FINAL] * lightPosition
+            lightPosition = lightPosition.convert_point4_vector3()
+            l = lightPosition - hit.point
+            l = l.normalize_vector()
+
+            # Calculate light incidence angle
+            cosTheta = hit.normal.calculate_scalar_product(l)
+
+            # If light is being incided on the object's normal (less than 90º), add the diffuse coefficient
+            if cosTheta > 0.0:
+                color = color + (((light.color * hit.material.color) * hit.material.diffuse) * cosTheta)
 
         # If the ray intersects an object, paint the pixel with the nearest scene object material color with the light interference
         return color / len(sceneObjects[2]) 
@@ -510,12 +526,21 @@ def preliminar_calculations(camera: Camera, image: Image, sceneObjects: list) ->
     inversefinalTrianglesTransformation.inverse_matrix()
     transposedFinalTrianglesTransformation = copy.copy(inversefinalTrianglesTransformation)
     transposedFinalTrianglesTransformation.transpose_matrix()
+    # Lights
+    lightsTransformation = Transformation()
+    lightsTransformation.translate(-7, 5, 66)
+    finalLightsTransformation = cameraTransformation * lightsTransformation
+    inversefinalLightsTransformation = copy.copy(finalLightsTransformation)
+    inversefinalLightsTransformation.inverse_matrix()
+    transposedFinalLightsTransformation = copy.copy(inversefinalLightsTransformation)
+    transposedFinalLightsTransformation.transpose_matrix()
 
     transformList = list()
     transformList.append([cameraTransformation])
     transformList.append([finalSphereTransformation, inversefinalSphereTransformation, transposedFinalSphereTransformation])
     transformList.append([finalBoxTransformation, inversefinalBoxTransformation, transposedFinalBoxTransformation])
     transformList.append([finalTrianglesTransformation, inversefinalTrianglesTransformation, transposedFinalTrianglesTransformation])
+    transformList.append([finalLightsTransformation, inversefinalLightsTransformation, transposedFinalLightsTransformation])
 
     # For each pixel in the image, generate a ray from the camera to the back of the scene to check if the ray intersects with any scene objects.
     # If it does, return the color of the intersection. With that list of colors (40k), an image will be generated with the calculated colors.
