@@ -355,7 +355,7 @@ def generate_scene_objects(imageContents: dict) -> list:
     lightTransformation.translate(float(lightTranslation["X"]), float(lightTranslation["Y"]), float(lightTranslation["Z"]))
     lightColor = Color3(float(imageContents["Lights"][0]["Color"]["Red"]), float(imageContents["Lights"][0]["Color"]["Green"]), float(imageContents["Lights"][0]["Color"]["Blue"]))
     light = Light(lightTransformation, lightColor)
-    sceneObjects.append(light)
+    sceneObjects.append([light])
 
     # Sphere
     sphereTransformation = Transformation()
@@ -439,8 +439,14 @@ def trace_rays(ray: Ray, rec: int, sceneObjects: list, transformList: list, tria
             pass
 
     if hit.found:
-        # If the ray intersects an object, paint the pixel with the nearest scene object material color
-        return hit.material.color
+        color = Color3(0.0, 0.0, 0.0)
+        # Go through all scene lights
+        for light in sceneObjects[2]:
+            # Calculate color with light interference
+            color = color + ((light.color * hit.material.color) * hit.material.ambient)
+
+        # If the ray intersects an object, paint the pixel with the nearest scene object material color with the light interference
+        return color / len(sceneObjects[2]) 
     else:
         # If the ray hits no scene objects, paint the pixel with the background color (Black)
         return Color3(0.0, 0.0, 0.0)

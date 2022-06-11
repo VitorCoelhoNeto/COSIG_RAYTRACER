@@ -45,6 +45,41 @@ class Color3:
             self.green = 0.0
         if self.blue < 0.0:
             self.blue = 0.0
+    
+    
+    def __mul__(self, col3):
+        """
+        Overload of the '*' operation
+        :param Color3/int/float col3: Color/variable to be multiplied by.
+        :return: Color multiplication
+        :rtype: Color3
+        """
+        if isinstance(col3, Color3):
+            return Color3(float(self.red * col3.red), float(self.green * col3.green), float(self.blue * col3.blue))
+        if isinstance(col3, int) or isinstance(col3, float):
+            return Color3(float(self.red * col3), float(self.green * col3), float(self.blue * col3))
+    
+
+    def __add__(self, col3):
+        """
+        Overload of the '+' operation
+        :param Color3 col3: Color to be summed by.
+        :return: Color addition
+        :rtype: Color3
+        """
+        if isinstance(col3, Color3):
+            return Color3(float(self.red + col3.red), float(self.green + col3.green), float(self.blue + col3.blue))
+
+
+    def __truediv__(self, t):
+        """
+        Overload of the '/' operation
+        :param float/int t: Factor to be divided by by.
+        :return: Color division
+        :rtype: Color3
+        """
+        if isinstance(t, float) or isinstance(t, int):
+            return Color3(float(self.red / t), float(self.green / t), float(self.blue / t))
 
 
 
