@@ -426,17 +426,17 @@ def trace_rays(ray: Ray, rec: int, sceneObjects: list, transformList: list, tria
     :rtype: Color3
     """
     hit = Hit(False, Material(Color3(0.0, 0.0, 0.0), 0.0, 0.0, 0.0, 0.0, 1.0), Vector3(0, 0, 0), Vector3(0, 0, 0), 0.0, float(1 * pow(10, 12)))
-    for object in sceneObjects: # TODO add them all together by uncommenting box and sphere intersect and removing the if len
-        if isinstance(object, TrianglesMesh):
-            #if len(object.triangleList) == 6: # Só estamos a fazer para o chão para já, para acelerar os testes
-            for triangle in object.triangleList:
-                triangle.intersect(triangleRay, hit, transformList)
+    for objecto in sceneObjects: # TODO add them all together by uncommenting box and sphere intersect and removing the if len
+        if isinstance(objecto, TrianglesMesh):
+            if len(objecto.triangleList) == 6 or len(objecto.triangleList) == 128: # Só estamos a fazer para o chão para já, para acelerar os testes
+                for triangle in objecto.triangleList:
+                    triangle.intersect(triangleRay, hit, transformList)
             pass
-        if isinstance(object, Box):
-            #object.intersect(boxRay, hit, transformList)
+        if isinstance(objecto, Box):
+            #objecto.intersect(boxRay, hit, transformList)
             pass
-        if isinstance(object, Sphere):
-            object.intersect(sphereRay, hit, transformList)
+        if isinstance(objecto, Sphere):
+            objecto.intersect(sphereRay, hit, transformList)
             pass
 
     if hit.found:
@@ -448,10 +448,12 @@ def trace_rays(ray: Ray, rec: int, sceneObjects: list, transformList: list, tria
 
             # Calculate distance from intersection point and light source
             lightPosition = Vector3(0, 0, 0)
-            lightPosition = lightPosition.convert_point3_vector4() # TODO
+            lightPosition = lightPosition.convert_point3_vector4() # TODO Check if this step is correct
             lightPosition = transformList[L][FINAL] * lightPosition
             lightPosition = lightPosition.convert_point4_vector3()
+            #lightPosition = lightPosition.normalize_vector() # TODO Do we need to normalize? Because it looks more similar to the sample image without normalization
             l = lightPosition - hit.point
+            lLength = l.calculate_distance()
             l = l.normalize_vector()
 
             # Calculate light incidence angle
@@ -459,7 +461,29 @@ def trace_rays(ray: Ray, rec: int, sceneObjects: list, transformList: list, tria
 
             # If light is being incided on the object's normal (less than 90º), add the diffuse coefficient
             if cosTheta > 0.0:
-                color = color + ((light.color * hit.material.diffuseColor) * cosTheta)
+                # Calculate shadows using diffuse lighting #TODO
+                shadowRay = Ray(hit.point, l)
+                shadowHit = Hit(False, Material(Color3(0.0, 0.0, 0.0), 0.0, 0.0, 0.0, 0.0, 1.0), Vector3(0, 0, 0), Vector3(0, 0, 0), 0.0, float(1 * pow(10, 12)))
+                shadowHit.t_min = lLength
+
+                for item in sceneObjects:
+                    if isinstance(item, TrianglesMesh):
+                        if len(item.triangleList) == 6 or len(item.triangleList) == 128: # Só estamos a fazer para o chão para já, para acelerar os testes
+                            for triangle2 in item.triangleList:
+                                triangle2.intersect(shadowRay, shadowHit, transformList)
+                        pass
+                    if isinstance(item, Box):
+                        #item.intersect(shadowRay, shadowHit, transformList)
+                        pass
+                    if isinstance(item, Sphere):
+                        #item.intersect(shadowRay, shadowHit, transformList)
+                        pass
+                    
+                    if shadowHit.found:
+                        break
+                
+                if not shadowHit.found:
+                    color = color + ((light.color * hit.material.diffuseColor) * cosTheta)
 
         # If the ray intersects an object, paint the pixel with the nearest scene object material color with the light interference
         return color / len(sceneObjects[2]) 

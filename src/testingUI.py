@@ -77,6 +77,7 @@ class MainWindow(QMainWindow):
         
         for pixel in pixelList:
             self.pixelListMain.append([int(pixel.red), int(pixel.green), int(pixel.blue)])
+        self.pixelListMain.reverse()
 
     def startRaytracing(self):
         print("start button clicked")

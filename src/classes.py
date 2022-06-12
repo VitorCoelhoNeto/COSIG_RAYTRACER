@@ -702,7 +702,7 @@ class Triangle(Object3D):
         print(self.transformation.print_matrix_items())
 
 
-    def calculate_normal(self):
+    def calculate_normal(self): # TODO Check if this is correctly calculated
         """
         Calculates triangle normal vector.
         :returns:
@@ -822,6 +822,15 @@ class Box(Object3D):
         self.bounds=[Vector3(-0.5, -0.5, -0.5), Vector3(0.5,0.5,0.5)]
 
     
+    def calculate_normal(self):  # TODO Calculate box normal
+        """
+        Calculates box's normal on intersection point.
+        :returns: Box's normal on intersection point.
+        :rtype: Vector3
+        """
+        return Vector3(1, 1, 1)
+
+    
     def intersect(self, boxRay: Ray, hit: Hit, transformList: list) -> bool: # TODO Box transformations
         """
         Checks if the ray hits the object or not.
@@ -889,7 +898,7 @@ class Box(Object3D):
 
         # (Step 3) Convert point to homogenoeus coordinates (object coordinates), transform it, and bring it back to world coordinates (cartesian coordinates)     
         # Calculate normal and apply transformation before transforming the intersection point
-        normal =  Vector3(0, 0, 0) # TODO Calculate box normal
+        normal =  self.calculate_normal()
 
         intersectionPoint = intersectionPoint.convert_point3_vector4()
         intersectionPoint = transformList[B][FINAL] * intersectionPoint
@@ -928,6 +937,15 @@ class Sphere(Object3D):
 
     def __init__(self, transformation, material):
         super().__init__(transformation, material)
+
+    
+    def calculate_normal(self):  # TODO Calculate sphere's normal
+        """
+        Calculates sphere's normal on intersection point.
+        :returns: Sphere's normal in intersection point.
+        :rtype: Vector3
+        """
+        return Vector3(1, 1, 1)
     
 
     def intersect(self, sphereRay: Ray, hit: Hit, transformList:list) -> bool:
@@ -966,7 +984,7 @@ class Sphere(Object3D):
             
             # (Step 3) Convert point to homogenoeus coordinates (object coordinates), transform it, and bring it back to world coordinates (cartesian coordinates)
             # Calculate normal and apply transformation before transforming the intersection point
-            normal =  Vector3(1, 1, 1) # TODO Calculate sphere normal
+            normal = self.calculate_normal()
             point = point.convert_point3_vector4()
             point = transformList[S][FINAL] * point
             point = point.convert_point4_vector3()
