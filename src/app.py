@@ -398,11 +398,6 @@ def generate_scene_objects(imageContents: dict) -> list:
     meshMat = Material(Color3(0.0, 0.0, 0.0), 0.5, 0.5, 0.5, 0.5, 1.5) # Dummy material as it is irrelevant because each triangle has its own material
     meshTransformation = Transformation() # All meshes have transformation 0, which is equivalent to the identity matrix
 
-    # Floor mesh
-    floorTriangleList = get_mesh_triangle_list(imageContents, 0)
-    floorMesh = TrianglesMesh(meshTransformation, meshMat, floorTriangleList)
-    sceneObjects.append(floorMesh)
-
     # Pyramid mesh
     pyramidTriangleList = get_mesh_triangle_list(imageContents, 1)
     pyramidMesh = TrianglesMesh(meshTransformation, meshMat, pyramidTriangleList)
@@ -412,6 +407,11 @@ def generate_scene_objects(imageContents: dict) -> list:
     donutTriangleList = get_mesh_triangle_list(imageContents, 2)
     donutMesh = TrianglesMesh(meshTransformation, meshMat, donutTriangleList)
     sceneObjects.append(donutMesh)
+
+    # Floor mesh
+    floorTriangleList = get_mesh_triangle_list(imageContents, 0)
+    floorMesh = TrianglesMesh(meshTransformation, meshMat, floorTriangleList)
+    sceneObjects.append(floorMesh)
 
     return sceneObjects
 
@@ -428,12 +428,12 @@ def trace_rays(ray: Ray, rec: int, sceneObjects: list, transformList: list, tria
     hit = Hit(False, Material(Color3(0.0, 0.0, 0.0), 0.0, 0.0, 0.0, 0.0, 1.0), Vector3(0, 0, 0), Vector3(0, 0, 0), 0.0, float(1 * pow(10, 12)))
     for objecto in sceneObjects: # TODO add them all together by uncommenting box and sphere intersect and removing the if len
         if isinstance(objecto, TrianglesMesh):
-            if len(objecto.triangleList) == 6 or len(objecto.triangleList) == 128: # Só estamos a fazer para o chão para já, para acelerar os testes
-                for triangle in objecto.triangleList:
-                    triangle.intersect(triangleRay, hit, transformList)
+            #if len(objecto.triangleList) == 6 or len(objecto.triangleList) == 128: # Só estamos a fazer para o chão para já, para acelerar os testes
+            for triangle in objecto.triangleList:
+                triangle.intersect(triangleRay, hit, transformList)
             pass
         if isinstance(objecto, Box):
-            #objecto.intersect(boxRay, hit, transformList)
+            objecto.intersect(boxRay, hit, transformList)
             pass
         if isinstance(objecto, Sphere):
             objecto.intersect(sphereRay, hit, transformList)
@@ -448,10 +448,10 @@ def trace_rays(ray: Ray, rec: int, sceneObjects: list, transformList: list, tria
 
             # Calculate distance from intersection point and light source
             lightPosition = Vector3(0, 0, 0)
-            lightPosition = lightPosition.convert_point3_vector4() # TODO Check if this step is correct
+            lightPosition = lightPosition.convert_point3_vector4()
             lightPosition = transformList[L][FINAL] * lightPosition
             lightPosition = lightPosition.convert_point4_vector3()
-            #lightPosition = lightPosition.normalize_vector() # TODO Do we need to normalize? Because it looks more similar to the sample image without normalization
+
             l = lightPosition - hit.point
             lLength = l.calculate_distance()
             l = l.normalize_vector()
@@ -461,16 +461,20 @@ def trace_rays(ray: Ray, rec: int, sceneObjects: list, transformList: list, tria
 
             # If light is being incided on the object's normal (less than 90º), add the diffuse coefficient
             if cosTheta > 0.0:
-                # Calculate shadows using diffuse lighting #TODO
                 shadowRay = Ray(hit.point, l)
                 shadowHit = Hit(False, Material(Color3(0.0, 0.0, 0.0), 0.0, 0.0, 0.0, 0.0, 1.0), Vector3(0, 0, 0), Vector3(0, 0, 0), 0.0, float(1 * pow(10, 12)))
                 shadowHit.t_min = lLength
 
+                #shadowRay.direction = shadowRay.direction.convert_vector3_vector4()
+                #shadowRay.direction = transformList[L][INV] * shadowRay.direction # TODO not the light transformation, it's each object's
+                #shadowRay.direction = shadowRay.direction.convert_vector4_vector3()
+                #shadowRay.direction = shadowRay.direction.normalize_vector()
+
                 for item in sceneObjects:
                     if isinstance(item, TrianglesMesh):
-                        if len(item.triangleList) == 6 or len(item.triangleList) == 128: # Só estamos a fazer para o chão para já, para acelerar os testes
-                            for triangle2 in item.triangleList:
-                                triangle2.intersect(shadowRay, shadowHit, transformList)
+                        #if len(item.triangleList) == 6 or len(item.triangleList) == 128: # TODO Add them all together
+                        #    for triangle2 in item.triangleList:
+                        #        triangle2.intersect_shadow(shadowRay, shadowHit, transformList)
                         pass
                     if isinstance(item, Box):
                         #item.intersect(shadowRay, shadowHit, transformList)
@@ -484,6 +488,18 @@ def trace_rays(ray: Ray, rec: int, sceneObjects: list, transformList: list, tria
                 
                 if not shadowHit.found:
                     color = color + ((light.color * hit.material.diffuseColor) * cosTheta)
+
+        #if rec > 0:
+        #    cosThetaV = -ray.direction.calculate_scalar_product(hit.normal)
+        #
+        #    if hit.material.specular > 0.0:
+        #        
+        #        r = ray.direction + (hit.normal * (2.0 * cosThetaV))
+        #        r.normalize_vector()
+        #
+        #        reflectedRay = Ray(hit.point, r)
+        #        
+        #        color = color + hit.material.color * hit.material.specular * trace_rays(reflectedRay, rec - 1, sceneObjects, transformList, triangleRay, sphereRay, boxRay)
 
         # If the ray intersects an object, paint the pixel with the nearest scene object material color with the light interference
         return color / len(sceneObjects[2]) 

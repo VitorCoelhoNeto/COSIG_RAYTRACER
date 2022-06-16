@@ -1,4 +1,5 @@
 import numpy as np
+import copy
 
 C = 0
 S = 1
@@ -415,7 +416,7 @@ class Transformation:
         self.matrix = [list(self.matrix[0]), list(self.matrix[1]), list(self.matrix[2]), list(self.matrix[3])]
         return self.matrix
 
-    # TODO Find a workaround to get the exact values of the sines and cosines
+
     def rotateX(self, angle: float):
         """
         :param float angle: rotation angle in degrees (function converts to radians).
@@ -781,6 +782,81 @@ class Triangle(Object3D):
         return False
 
     
+    def intersect_shadow(self, shadowRay: Ray, hit: Hit, transformList: list) -> bool: # TODO
+        """
+        Checks if the ray hits the object or not.
+        :param Ray ray: Current ray being analyzed.
+        :param Hit hit: Information about the ray intersection with the current object. If no intersection, hit.found = False, rest is irrelevant.
+        :returns: True if ray intersects current object, False if not
+        :rtype: bool
+        """
+        epsilon = 1 * pow(10, -6)
+
+        triangleRay = copy.copy(shadowRay)
+        triangleRay.direction = triangleRay.direction.convert_vector3_vector4() # TODO COPY RAY AND THEN TRANSFORM IT
+        triangleRay.direction = transformList[T][INV] * triangleRay.direction
+        triangleRay.direction = triangleRay.direction.convert_vector4_vector3()
+        triangleRay.direction = triangleRay.direction.normalize_vector()
+
+        triangleRay.origin = triangleRay.origin.convert_point3_vector4()
+        triangleRay.origin = transformList[T][INV] * triangleRay.origin
+        triangleRay.origin = triangleRay.origin.convert_point4_vector3()
+    
+        # (Step 2) Calculate point if there is an intersection point between the triangleRay and the current object
+        beta = (self.calculate_determinant([ [(self.vertex1.x - triangleRay.origin.x),    (self.vertex1.x - self.vertex3.x), triangleRay.direction.x, 0], 
+                                             [(self.vertex1.y - triangleRay.origin.y),    (self.vertex1.y - self.vertex3.y), triangleRay.direction.y, 0], 
+                                             [(self.vertex1.z - (triangleRay.origin.z )), (self.vertex1.z - self.vertex3.z), triangleRay.direction.z, 0],
+                                             [0,                                  0,                                 0,               1] ])) / (self.calculate_determinant([
+                                                
+                                             [(self.vertex1.x - self.vertex2.x), (self.vertex1.x - self.vertex3.x), triangleRay.direction.x, 0], 
+                                             [(self.vertex1.y - self.vertex2.y), (self.vertex1.y - self.vertex3.y), triangleRay.direction.y, 0], 
+                                             [(self.vertex1.z - self.vertex2.z), (self.vertex1.z - self.vertex3.z), triangleRay.direction.z, 0],
+                                             [0,                                 0,                                 0,               1] ]))
+    
+        if beta >= 0:
+            gamma = (self.calculate_determinant([ [(self.vertex1.x - self.vertex2.x), (self.vertex1.x - triangleRay.origin.x), triangleRay.direction.x, 0], 
+                                                  [(self.vertex1.y - self.vertex2.y), (self.vertex1.y - triangleRay.origin.y), triangleRay.direction.y, 0],
+                                                  [(self.vertex1.z - self.vertex2.z), (self.vertex1.z - triangleRay.origin.z), triangleRay.direction.z, 0],
+                                                  [0,                                 0,                               0,               1] ])) / (self.calculate_determinant([
+                                                  
+                                                  [(self.vertex1.x - self.vertex2.x), (self.vertex1.x - self.vertex3.x), triangleRay.direction.x, 0], 
+                                                  [(self.vertex1.y - self.vertex2.y), (self.vertex1.y - self.vertex3.y), triangleRay.direction.y, 0], 
+                                                  [(self.vertex1.z - self.vertex2.z), (self.vertex1.z - self.vertex3.z), triangleRay.direction.z, 0],
+                                                  [0,                                 0,                                 0,               1] ]))
+            # alpha = 1.0 - beta - gamma # Not necessary because we already know that if β > 0.0, γ > 0.0 and β + γ < 1.0 the ray intersects the object
+            
+            # Check if ray intersects
+            if beta >= -epsilon and gamma >= -epsilon and (beta + gamma < 1.0 + epsilon):
+                point = self.vertex1 + (self.vertex2 - self.vertex1) * beta + (self.vertex3 - self.vertex1) * gamma
+                point2 = self.vertex1 + (self.vertex2 - self.vertex1) * beta + (self.vertex3 - self.vertex1) * gamma
+    
+                # (Step 3) Convert point to homogenoeus coordinates (object coordinates), transform it, and bring it back to world coordinates (cartesian coordinates)
+                # Calculate normal and apply transformation before applying the transformation to the intersection point
+                normal =  self.calculate_normal()#Calcular a normal N’ à superfície do objecto i no ponto P’ de intersecção
+    
+                point = point.convert_point3_vector4()
+                point = transformList[T][FINAL] * point
+                point = point.convert_point4_vector3()
+    
+                v = point - triangleRay.origin
+                hit.t = v.calculate_distance()
+                if hit.t >= epsilon and hit.t < hit.t_min:
+                    # Transform normal
+                    normal = normal.convert_vector3_vector4()
+                    normal = transformList[T][TRAN] * normal
+                    normal = normal.convert_vector4_vector3()
+                    normal = normal.normalize_vector()
+    
+                    hit.found = True
+                    hit.t_min = hit.t
+                    hit.material = self.material
+                    hit.point = point
+                    hit.normal = normal
+                    return True
+    
+        return False
+
+    
     def calculate_determinant(self, matrix):
         """
         CAlculates a matrix determinant.
@@ -831,7 +907,7 @@ class Box(Object3D):
         return Vector3(1, 1, 1)
 
     
-    def intersect(self, boxRay: Ray, hit: Hit, transformList: list) -> bool: # TODO Box transformations
+    def intersect(self, boxRay: Ray, hit: Hit, transformList: list) -> bool:
         """
         Checks if the ray hits the object or not.
         :param Ray ray: Current ray being analyzed.
@@ -839,14 +915,14 @@ class Box(Object3D):
         :returns: True if ray intersects current object, False if not
         :rtype: bool
         """
-        epsilon = 1 * pow(10, -6)
-
+        epsilon = 1.0E-6 
+        
         tnear = -1000
         tfar = 1000
 
         minimumCoords = -0.5
         maximumCoords = 0.5
-
+        
         # Ray directions and origins
         Dx = boxRay.direction.x
         Rx = boxRay.origin.x
@@ -854,7 +930,7 @@ class Box(Object3D):
         Ry = boxRay.origin.y
         Dz = boxRay.direction.z
         Rz = boxRay.origin.z
-
+        
         # Doesn't intersect
         if Dx == 0:
             if Rx < minimumCoords or Rx > maximumCoords:
@@ -865,7 +941,7 @@ class Box(Object3D):
         if Dz == 0:
             if Rz < minimumCoords or Rz > maximumCoords:
                 return False
-
+        
         # Intersections
         txmin = (-0.5 - Rx)/Dx
         txmax = (0.5 - Rx)/Dx
@@ -874,56 +950,72 @@ class Box(Object3D):
         tzmin = (-0.5 - Rz)/Dz
         tzmax = (0.5 - Rz)/Dz
         
-
-
-        # ?????
-        if txmin > tymax or tymin > txmax: 
+        # Check x axis
+        if txmin > txmax: 
+            txmin, txmax = [txmax, txmin]
+        if txmin > tnear:
+            tnear = txmin
+        if txmax < tfar:
+            tfar = txmax
+        if tnear > tfar:
             return False
-        if tymin > txmin: 
-            txmin = tymin   
-        if tymax < txmax: 
-            txmax = tymax
-        
-        if txmin > tzmax or tzmin > txmax: 
+        if tfar < 0:
             return False
-        if tzmin > txmin: 
-            txmin = tzmin   
-        if tzmax < txmax: 
-            txmax = tzmax
-        # P(T) = R + tnear * D
 
+        # Check y axis
+        if tymin > tymax: 
+            tymin, tymax = [tymax, tymin]
+        if tymin > tnear:
+            tnear = tymin
+        if tymax < tfar:
+            tfar = tymax
+        if tnear > tfar:
+            return False
+        if tfar < 0:
+            return False
 
+        # Check z axis
+        if tzmin > tzmax: 
+            tzmin, tzmax = [tzmax, tzmin]
+        if tzmin > tnear:
+            tnear = tzmin
+        if tzmax < tfar:
+            tfar = tzmax
+        if tnear > tfar:
+            return False
+        if tfar < 0:
+            return False
 
-        intersectionPoint = Vector3(txmin, tymin, tzmin)
+        intersectionPoint = Vector3(Rx + Dx * tnear, Ry + Dy * tnear, Rz + Dz * tnear)
 
         # (Step 3) Convert point to homogenoeus coordinates (object coordinates), transform it, and bring it back to world coordinates (cartesian coordinates)     
         # Calculate normal and apply transformation before transforming the intersection point
         normal =  self.calculate_normal()
-
+        
         intersectionPoint = intersectionPoint.convert_point3_vector4()
         intersectionPoint = transformList[B][FINAL] * intersectionPoint
         intersectionPoint = intersectionPoint.convert_point4_vector3()
-
+        
         # Calculate distance
         distance = intersectionPoint - boxRay.origin
         hit.t = distance.calculate_distance()
-
+        
         # Intersection is verified
         if hit.t >= epsilon and hit.t < hit.t_min:
-
+        
             # Transform normal
             normal = normal.convert_vector3_vector4()
-            normal = transformList[T][TRAN] * normal
+            normal = transformList[B][TRAN] * normal
             normal = normal.convert_vector4_vector3()
             normal = normal.normalize_vector()
-
+        
             hit.found = True
             hit.t_min = hit.t
             hit.material = self.material
             hit.normal = normal
             hit.point = intersectionPoint
             return True
-
+        
         return False
 
 
@@ -939,13 +1031,15 @@ class Sphere(Object3D):
         super().__init__(transformation, material)
 
     
-    def calculate_normal(self):  # TODO Calculate sphere's normal
+    def calculate_normal(self, point: Vector3):
         """
         Calculates sphere's normal on intersection point.
         :returns: Sphere's normal in intersection point.
         :rtype: Vector3
         """
-        return Vector3(1, 1, 1)
+        scalar = float(np.sqrt(point.calculate_scalar_product(point)))
+        normal = Vector3(float(point.x / scalar), float(point.y / scalar), float(point.z / scalar))
+        return normal
     
 
     def intersect(self, sphereRay: Ray, hit: Hit, transformList:list) -> bool:
@@ -984,7 +1078,7 @@ class Sphere(Object3D):
             
             # (Step 3) Convert point to homogenoeus coordinates (object coordinates), transform it, and bring it back to world coordinates (cartesian coordinates)
             # Calculate normal and apply transformation before transforming the intersection point
-            normal = self.calculate_normal()
+            normal = self.calculate_normal(point)
             point = point.convert_point3_vector4()
             point = transformList[S][FINAL] * point
             point = point.convert_point4_vector3()
