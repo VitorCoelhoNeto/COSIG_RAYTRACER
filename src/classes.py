@@ -56,20 +56,24 @@ class Color3:
         :rtype: Color3
         """
         if isinstance(col3, Color3):
-            return Color3(float(self.red * col3.red), float(self.green * col3.green), float(self.blue * col3.blue))
+            col = copy.deepcopy(col3)
+            return Color3(  float(copy.deepcopy(self.red) * copy.deepcopy(col.red)), 
+                            float(copy.deepcopy(self.green) * copy.deepcopy(col.green)), 
+                            float(copy.deepcopy(self.blue) * copy.deepcopy(col.blue)))
         if isinstance(col3, int) or isinstance(col3, float):
-            return Color3(float(self.red * col3), float(self.green * col3), float(self.blue * col3))
+            return Color3(float(copy.deepcopy(self.red) * col3), float(copy.deepcopy(self.green) * col3), float(copy.deepcopy(self.blue) * col3))
     
 
-    def __add__(self, col3):
+    def __add__(self, col):
         """
         Overload of the '+' operation
         :param Color3 col3: Color to be summed by.
         :return: Color addition
         :rtype: Color3
         """
-        if isinstance(col3, Color3):
-            return Color3(float(self.red + col3.red), float(self.green + col3.green), float(self.blue + col3.blue))
+        if isinstance(col, Color3):
+            col3 = copy.deepcopy(col)
+            return Color3(float(copy.deepcopy(self.red) + col3.red), float(copy.deepcopy(self.green) + col3.green), float(copy.deepcopy(self.blue) + col3.blue))
 
 
     def __truediv__(self, t):
@@ -80,7 +84,7 @@ class Color3:
         :rtype: Color3
         """
         if isinstance(t, float) or isinstance(t, int):
-            return Color3(float(self.red / t), float(self.green / t), float(self.blue / t))
+            return Color3(float(copy.deepcopy(self.red) / t), float(copy.deepcopy(self.green) / t), float(copy.deepcopy(self.blue) / t))
 
 
 
@@ -141,7 +145,7 @@ class Vector3:
         :returns: float
         :rtype: float
         """
-        return np.sqrt(pow(self.x, 2) + pow(self.y, 2) + pow(self.z, 2))
+        return np.sqrt( (copy.deepcopy(self.x) * copy.deepcopy(self.x)) + (copy.deepcopy(self.y) * copy.deepcopy(self.y)) + (copy.deepcopy(self.z) * copy.deepcopy(self.z)) )
 
 
     def calculate_scalar_product(self, vector2):
@@ -151,8 +155,8 @@ class Vector3:
         :returns: float
         :rtype: float
         """
-        mainArray = [self.x, self.y, self.z]
-        secondArray = [vector2.x, vector2.y, vector2.z]
+        mainArray = [copy.deepcopy(self.x), copy.deepcopy(self.y), copy.deepcopy(self.z)]
+        secondArray = [copy.deepcopy(vector2.x), copy.deepcopy(vector2.y), copy.deepcopy(vector2.z)]
         return np.dot(np.array(mainArray), np.array(secondArray))
 
 
@@ -163,8 +167,8 @@ class Vector3:
         :returns: float
         :rtype: float
         """
-        mainArray = [self.x, self.y, self.z]
-        secondArray = [vector2.x, vector2.y, vector2.z]
+        mainArray = [copy.deepcopy(self.x), copy.deepcopy(self.y), copy.deepcopy(self.z)]
+        secondArray = [copy.deepcopy(vector2.x), copy.deepcopy(vector2.y), copy.deepcopy(vector2.z)]
         crossProduct = np.cross(np.array(mainArray), np.array(secondArray))
         return Vector3(float(crossProduct[0]), float(crossProduct[1]), float(crossProduct[2])) 
 
@@ -181,15 +185,16 @@ class Vector3:
         return np.sqrt(pow((vector2.x - self.x), 2) + pow((vector2.y - self.y), 2) + pow((vector2.z - self.z), 2))
 
 
-    def __add__(self, vec3):
+    def __add__(self, vec):
         """
         Overload of the '+' operation
         :param Vector3 vec3: Vector to be added to the original one
         :return: Vector3(self.x + vec3.x, self.y + vec3.y, self.z + vec3.z)
         :rtype: Vector3
         """
-        if isinstance(vec3, Vector3):
-            return Vector3(self.x + vec3.x, self.y + vec3.y, self.z + vec3.z)
+        if isinstance(vec, Vector3):
+            vec3 = copy.deepcopy(vec)
+            return Vector3(copy.deepcopy(self.x) + vec3.x, copy.deepcopy(self.y) + vec3.y, copy.deepcopy(self.z) + vec3.z)
 
 
     def __mul__(self, t):
@@ -200,18 +205,19 @@ class Vector3:
         :rtype: Vector3
         """
         if isinstance(t, float) or isinstance(t, int):
-            return Vector3(float(self.x * t), float(self.y * t), float(self.z * t))
+            return Vector3(float(copy.deepcopy(self.x) * t), float(copy.deepcopy(self.y) * t), float(copy.deepcopy(self.z) * t))
 
 
-    def __sub__(self, vec3):
+    def __sub__(self, vec):
         """
         Overload of the '-' operation
         :param Vector3 vec3: Vector to be added to the original one
         :return: Vector3(self.x + vec3.x, self.y + vec3.y, self.z + vec3.z)
         :rtype: Vector3
         """
-        if isinstance(vec3, Vector3):
-            return Vector3(self.x - vec3.x, self.y - vec3.y, self.z - vec3.z)
+        if isinstance(vec, Vector3):
+            vec3 = copy.deepcopy(vec)
+            return Vector3(copy.deepcopy(self.x) - vec3.x, copy.deepcopy(self.y) - vec3.y, copy.deepcopy(self.z) - vec3.z)
 
 
 
@@ -243,7 +249,9 @@ class Vector4:
         :returns: Converted Vector4 to Vector3 (Point).
         :rtype: Vector3
         """
-        return Vector3(self.x / self.w, self.y / self.w, self.z / self.w)
+        return Vector3(copy.deepcopy(self.x) / copy.deepcopy(self.w),
+                       copy.deepcopy(self.y) / copy.deepcopy(self.w), 
+                       copy.deepcopy(self.z) / copy.deepcopy(self.w))
 
 
     def convert_vector4_vector3(self):
@@ -255,14 +263,15 @@ class Vector4:
         return Vector3(self.x, self.y, self.z)
 
 
-    def calculate_scalar_product(self, vector2):
+    def calculate_scalar_product(self, vector):
         """
         Calculates the dot product of two vectors.
         :param Vector3 vector2: Vector to be calculated with the original vector.
         :returns: float
         :rtype: float
         """
-        mainArray = [self.x, self.y, self.z, self.w]
+        vector2 = copy.deepcopy(vector)
+        mainArray = [copy.deepcopy(self.x), copy.deepcopy(self.y), copy.deepcopy(self.z), copy.deepcopy(self.w)]
         secondArray = [vector2.x, vector2.y, vector2.z, vector2.w]
         return np.dot(np.array(mainArray), np.array(secondArray))
 
@@ -273,29 +282,35 @@ class Vector4:
         :returns: float
         :rtype: float
         """
-        return np.sqrt(pow(self.x, 2) + pow(self.y, 2) + pow(self.z, 2) + pow(self.w, 2))
+        #return np.sqrt(pow(self.x, 2) + pow(self.y, 2) + pow(self.z, 2) + pow(self.w, 2))
+        return np.sqrt( (copy.deepcopy(self.x) * copy.deepcopy(self.x)) + 
+                        (copy.deepcopy(self.y) * copy.deepcopy(self.y)) + 
+                        (copy.deepcopy(self.z) * copy.deepcopy(self.z)) +
+                        (copy.deepcopy(self.w) * copy.deepcopy(self.w)))
 
 
-    def __sub__(self, vec4):
+    def __sub__(self, vec):
         """
         Overload of the '-' operation
         :param Vector4 vec4: Vector to be added to the original one
         :return: Vector4(self.x + vec4.x, self.y + vec4.y, self.z + vec4.z)
         :rtype: Vector4
         """
-        if isinstance(vec4, Vector4):
-            return Vector4(self.x - vec4.x, self.y - vec4.y, self.z - vec4.z, self.w - vec4.w)
+        if isinstance(vec, Vector4):
+            vec4 = copy.deepcopy(vec)
+            return Vector4(copy.deepcopy(self.x) - vec4.x, copy.deepcopy(self.y) - vec4.y, copy.deepcopy(self.z) - vec4.z, copy.deepcopy(self.w) - vec4.w)
     
 
-    def __add__(self, vec4):
+    def __add__(self, vec):
         """
         Overload of the '-' operation
         :param Vector4 vec4: Vector to be added to the original one
         :return: Vector4(self.x + vec4.x, self.y + vec4.y, self.z + vec4.z)
         :rtype: Vector4
         """
-        if isinstance(vec4, Vector4):
-            return Vector4(self.x + vec4.x, self.y + vec4.y, self.z + vec4.z, self.w + vec4.w)
+        if isinstance(vec, Vector4):
+            vec4 = copy.deepcopy(vec)
+            return Vector4(copy.deepcopy(self.x) + vec4.x, copy.deepcopy(self.y) + vec4.y, copy.deepcopy(self.z) + vec4.z, copy.deepcopy(self.w) + vec4.w)
     
 
     def __mul__(self, t):
@@ -306,7 +321,7 @@ class Vector4:
         :rtype: Vector4
         """
         if isinstance(t, float) or isinstance(t, int):
-            return Vector4(float(self.x * t), float(self.y * t), float(self.z * t), float(self.w * t))
+            return Vector4(float(copy.deepcopy(self.x) * t), float(copy.deepcopy(self.y) * t), float(copy.deepcopy(self.z) * t), float(copy.deepcopy(self.w) * t))
     
 
     def normalize_vector(self):
@@ -316,7 +331,7 @@ class Vector4:
         :returns: self
         :rtype: Vector4
         """
-        mainArray = [self.x, self.y, self.z, self.w]
+        mainArray = [copy.deepcopy(self.x), copy.deepcopy(self.y), copy.deepcopy(self.z), copy.deepcopy(self.w)]
         # normalized x = x/sqrt(x^2 + y^2 + z^2) and the same goes for y and z
         normalized = np.array(mainArray) / np.sqrt(np.sum(np.array(mainArray)**2))
         return Vector4(float(normalized[0]), float(normalized[1]), float(normalized[2]), float(normalized[3]))
@@ -519,13 +534,13 @@ class Transformation:
         :rtype: Vector4
         """
         if isinstance(vec4, Vector4):
-            vec4Multiplication = [vec4.x, vec4.y, vec4.z, vec4.w]
+            vec4Multiplication = [copy.deepcopy(vec4.x), copy.deepcopy(vec4.y), copy.deepcopy(vec4.z), copy.deepcopy(vec4.w)]
             result = np.matmul(self.matrix, vec4Multiplication)
             return Vector4(float(result[0]), float(result[1]), float(result[2]), float(result[3]))
 
         if isinstance(vec4, Transformation):
-            matrix = np.array(self.matrix)
-            matrix2 = np.array(vec4.matrix)
+            matrix = np.array(copy.deepcopy(self.matrix))
+            matrix2 = np.array(copy.deepcopy(vec4.matrix))
             
             result = matrix@matrix2
             #result = [list(result[0]), list(result[1]), list(result[2]), list(result[3])]
@@ -654,664 +669,4 @@ class Object3D:
     
     
     def intersect(self, ray: Ray, hit: Hit) -> bool:
-        epsilon = 1 * pow(10, -6)
         return True
-
-
-
-class Triangle(Object3D):
-    """
-    Represents a triangle 3D object. Inherits from base super class "Object3D"
-    :param Transformation transformation: Applied object transformation
-    :param Material material: Object material
-    """
-
-    def __init__(self, transformation, material, vertex1, vertex2, vertex3):
-        super().__init__(transformation, material)
-        if not isinstance(vertex1, Vector3):
-            raise TypeError("Vertices must be of type Vector3")
-        self.vertex1 = vertex1
-        self.vertex2 = vertex2
-        self.vertex3 = vertex3
-
-
-    def print_vertices(self):
-        """
-        Prints triangle's vertices coordinates.
-        """
-        print("Vertex 1: ", self.vertex1.x, self.vertex1.y, self.vertex1.z)
-        print("Vertex 2: ", self.vertex2.x, self.vertex2.y, self.vertex2.z)
-        print("Vertex 3: ", self.vertex3.x, self.vertex3.y, self.vertex3.z)
-
-
-    def print_material_properties(self):
-        """
-        Prints material properties.
-        """
-        print("Material color: Red:", self.material.color.red, " Green:",
-              self.material.color.green, " Blue:",  self.material.color.blue)
-        print("Material properties: Ambient:", self.material.ambient,
-              " Diffuse:", self.material.diffuse,
-              " Specular:", self.material.specular,
-              " Refraction:", self.material.refraction,
-              " Refraction Index:", self.material.refractionIndex)
-
-
-    def print_transformation(self):
-        """
-        Prints triangle's transformation
-        """
-        print(self.transformation.print_matrix_items())
-
-
-    def calculate_normal(self): # TODO Check if this is correctly calculated
-        """
-        Calculates triangle normal vector.
-        :returns:
-        :rtype: Vector3
-        """
-        edgeAB = self.vertex1 - self.vertex2
-        edgeBC = self.vertex2 - self.vertex3
-        normal = edgeAB.calculate_vectorial_product(edgeBC)
-        #tempVec = Vector3(float(normal[0]), float(normal[1]), float(normal[2]))
-        return normal.normalize_vector()
-    
-
-    def intersect(self, triangleRay: Ray, hit: Hit, transformList: list, isFloor: bool) -> bool:
-        """
-        Checks if the ray hits the object or not.
-        :param Ray ray: Current ray being analyzed.
-        :param Hit hit: Information about the ray intersection with the current object. If no intersection, hit.found = False, rest is irrelevant.
-        :returns: True if ray intersects current object, False if not
-        :rtype: bool
-        """
-        epsilon = 1 * pow(10, -6)
-
-        # (Step 2) Calculate point if there is an intersection point between the triangleRay and the current object
-        beta = (self.calculate_determinant([ [(self.vertex1.x - triangleRay.origin.x),    (self.vertex1.x - self.vertex3.x), triangleRay.direction.x, 0], 
-                                             [(self.vertex1.y - triangleRay.origin.y),    (self.vertex1.y - self.vertex3.y), triangleRay.direction.y, 0], 
-                                             [(self.vertex1.z - (triangleRay.origin.z )), (self.vertex1.z - self.vertex3.z), triangleRay.direction.z, 0],
-                                             [0,                                  0,                                 0,               1] ])) / (self.calculate_determinant([
-                                                
-                                             [(self.vertex1.x - self.vertex2.x), (self.vertex1.x - self.vertex3.x), triangleRay.direction.x, 0], 
-                                             [(self.vertex1.y - self.vertex2.y), (self.vertex1.y - self.vertex3.y), triangleRay.direction.y, 0], 
-                                             [(self.vertex1.z - self.vertex2.z), (self.vertex1.z - self.vertex3.z), triangleRay.direction.z, 0],
-                                             [0,                                 0,                                 0,               1] ]))
-
-        if beta >= 0:
-            gamma = (self.calculate_determinant([ [(self.vertex1.x - self.vertex2.x), (self.vertex1.x - triangleRay.origin.x), triangleRay.direction.x, 0], 
-                                                  [(self.vertex1.y - self.vertex2.y), (self.vertex1.y - triangleRay.origin.y), triangleRay.direction.y, 0],
-                                                  [(self.vertex1.z - self.vertex2.z), (self.vertex1.z - triangleRay.origin.z), triangleRay.direction.z, 0],
-                                                  [0,                                 0,                               0,               1] ])) / (self.calculate_determinant([
-                                                  
-                                                  [(self.vertex1.x - self.vertex2.x), (self.vertex1.x - self.vertex3.x), triangleRay.direction.x, 0], 
-                                                  [(self.vertex1.y - self.vertex2.y), (self.vertex1.y - self.vertex3.y), triangleRay.direction.y, 0], 
-                                                  [(self.vertex1.z - self.vertex2.z), (self.vertex1.z - self.vertex3.z), triangleRay.direction.z, 0],
-                                                  [0,                                 0,                                 0,               1] ]))
-            # alpha = 1.0 - beta - gamma # Not necessary because we already know that if β > 0.0, γ > 0.0 and β + γ < 1.0 the ray intersects the object
-            
-            # Check if ray intersects
-            if beta >= -epsilon and gamma >= -epsilon and (beta + gamma < 1.0 + epsilon):
-                point = self.vertex1 + (self.vertex2 - self.vertex1) * beta + (self.vertex3 - self.vertex1) * gamma
-
-                # (Step 3) Convert point to homogenoeus coordinates (object coordinates), transform it, and bring it back to world coordinates (cartesian coordinates)
-                # Calculate normal and apply transformation before applying the transformation to the intersection point
-                normal =  self.calculate_normal()#Calcular a normal N’ à superfície do objecto i no ponto P’ de intersecção
-
-                point = point.convert_point3_vector4()
-                point = transformList[T][FINAL] * point
-                point = point.convert_point4_vector3()
-
-                v = point - triangleRay.origin
-                hit.t = v.calculate_distance()
-                
-                if hit.t >= epsilon and hit.t < hit.t_min:
-                    
-                    # Transform normal
-                    normal = normal.convert_vector3_vector4()
-                    normal = transformList[T][TRAN] * normal
-                    normal = normal.convert_vector4_vector3()
-                    normal = normal.normalize_vector()
-
-                    hit.found = True
-                    hit.t_min = hit.t
-                    hit.material = self.material
-                    hit.point = point
-                    hit.normal = normal
-                    if isFloor:
-                        hit.is_floor = True
-                    else:
-                        hit.is_floor = False
-                    return True
-
-        return False
-
-    
-    def intersect_shadow(self, shadowRay: Ray, hit: Hit, transformList: list) -> bool: # TODO
-        """
-        Checks if the ray hits the object or not.
-        :param Ray ray: Current ray being analyzed.
-        :param Hit hit: Information about the ray intersection with the current object. If no intersection, hit.found = False, rest is irrelevant.
-        :returns: True if ray intersects current object, False if not
-        :rtype: bool
-        """
-        epsilon = 1 * pow(10, -6)
-
-        # (Step 1) Ray copy for the triangles. Transforming the ray
-        triangleRay = None
-        del triangleRay
-        triangleRay = copy.copy(shadowRay)
-        triangleRay.direction = triangleRay.direction.convert_vector3_vector4() # TODO COPY RAY AND THEN TRANSFORM IT
-        triangleRay.direction = transformList[T][INV] * triangleRay.direction
-        triangleRay.direction = triangleRay.direction.convert_vector4_vector3()
-        triangleRay.direction = triangleRay.direction.normalize_vector()
-
-        triangleRay.origin = triangleRay.origin.convert_point3_vector4()
-        triangleRay.origin = transformList[T][INV] * triangleRay.origin
-        triangleRay.origin = triangleRay.origin.convert_point4_vector3()
-    
-        # (Step 2) Calculate point if there is an intersection point between the triangleRay and the current object
-        beta = (self.calculate_determinant([ [(self.vertex1.x - triangleRay.origin.x),    (self.vertex1.x - self.vertex3.x), triangleRay.direction.x, 0], 
-                                             [(self.vertex1.y - triangleRay.origin.y),    (self.vertex1.y - self.vertex3.y), triangleRay.direction.y, 0], 
-                                             [(self.vertex1.z - (triangleRay.origin.z )), (self.vertex1.z - self.vertex3.z), triangleRay.direction.z, 0],
-                                             [0,                                  0,                                 0,               1] ])) / (self.calculate_determinant([
-                                                
-                                             [(self.vertex1.x - self.vertex2.x), (self.vertex1.x - self.vertex3.x), triangleRay.direction.x, 0], 
-                                             [(self.vertex1.y - self.vertex2.y), (self.vertex1.y - self.vertex3.y), triangleRay.direction.y, 0], 
-                                             [(self.vertex1.z - self.vertex2.z), (self.vertex1.z - self.vertex3.z), triangleRay.direction.z, 0],
-                                             [0,                                 0,                                 0,               1] ]))
-    
-        if beta >= 0:
-            gamma = (self.calculate_determinant([ [(self.vertex1.x - self.vertex2.x), (self.vertex1.x - triangleRay.origin.x), triangleRay.direction.x, 0], 
-                                                  [(self.vertex1.y - self.vertex2.y), (self.vertex1.y - triangleRay.origin.y), triangleRay.direction.y, 0],
-                                                  [(self.vertex1.z - self.vertex2.z), (self.vertex1.z - triangleRay.origin.z), triangleRay.direction.z, 0],
-                                                  [0,                                 0,                               0,               1] ])) / (self.calculate_determinant([
-                                                  
-                                                  [(self.vertex1.x - self.vertex2.x), (self.vertex1.x - self.vertex3.x), triangleRay.direction.x, 0], 
-                                                  [(self.vertex1.y - self.vertex2.y), (self.vertex1.y - self.vertex3.y), triangleRay.direction.y, 0], 
-                                                  [(self.vertex1.z - self.vertex2.z), (self.vertex1.z - self.vertex3.z), triangleRay.direction.z, 0],
-                                                  [0,                                 0,                                 0,               1] ]))
-            # alpha = 1.0 - beta - gamma # Not necessary because we already know that if β > 0.0, γ > 0.0 and β + γ < 1.0 the ray intersects the object
-            
-            # Check if ray intersects
-            if beta >= -epsilon and gamma >= -epsilon and (beta + gamma < 1.0 + epsilon):
-                point = self.vertex1 + (self.vertex2 - self.vertex1) * beta + (self.vertex3 - self.vertex1) * gamma
-
-                # Calculate normal and apply transformation before applying the transformation to the intersection point
-                normal =  self.calculate_normal()#Calcular a normal N’ à superfície do objecto i no ponto P’ de intersecção
-
-                # (Step 3) Convert point to homogenoeus coordinates (object coordinates), transform it, and bring it back to world coordinates (cartesian coordinates)
-                #point = point.convert_point3_vector4()
-                #point = transformList[T][FINAL] * point
-                #point = point.convert_point4_vector3()
-    
-                v = point - triangleRay.origin
-                hit.t = v.calculate_distance()
-                if hit.t >= epsilon and hit.t < hit.t_min:
-                    # Transform normal
-                    normal = normal.convert_vector3_vector4()
-                    normal = transformList[T][TRAN] * normal
-                    normal = normal.convert_vector4_vector3()
-                    normal = normal.normalize_vector()
-    
-                    hit.found = True
-                    hit.t_min = hit.t
-                    hit.material = self.material
-                    hit.point = point
-                    hit.normal = normal
-                    return True
-    
-        return False
-
-    
-    def calculate_determinant(self, matrix):
-        """
-        CAlculates a matrix determinant.
-        :param list/np.array matrix: Matrix to be determined.
-        :returns: The matrix's determinant. 
-        :rtype: float
-        """
-        return np.linalg.det(np.array(matrix))
-
-
-
-class TrianglesMesh(Object3D):
-    """
-    Represents a triangle mesh 3D object. Inherits from base super class "Object3D"
-    :param Transformation transformation: Applied object transformation
-    :param Material material: Object material
-    """
-
-    def __init__(self, transformation: Transformation, material: Material, triangleList: list):
-        super().__init__(transformation, material)
-        self.triangleList = triangleList
-
-    
-    def print_triangles_vertices(self):
-        for triangle in self.triangleList:
-            triangle.print_vertices()
-
-
-
-class Box(Object3D):
-    """
-    Represents a box 3D object. Inherits from base super class "Object3D"
-    :param Transformation transformation: Applied object transformation
-    :param Material material: Object material
-    """
-
-    def __init__(self, transformation, material):
-        super().__init__(transformation, material)
-        self.bounds=[Vector3(-0.5, -0.5, -0.5), Vector3(0.5,0.5,0.5)]
-
-    
-    def calculate_normal(self):  # TODO Calculate box normal
-        """
-        Calculates box's normal on intersection point.
-        :returns: Box's normal on intersection point.
-        :rtype: Vector3
-        """
-        return Vector3(1, 1, 1)
-
-    
-    def intersect(self, boxRay: Ray, hit: Hit, transformList: list) -> bool:
-        """
-        Checks if the ray hits the object or not.
-        :param Ray ray: Current ray being analyzed.
-        :param Hit hit: Information about the ray intersection with the current object. If no intersection, hit.found = False, rest is irrelevant.
-        :returns: True if ray intersects current object, False if not
-        :rtype: bool
-        """
-        epsilon = 1.0E-6 
-        
-        tnear = -1000
-        tfar = 1000
-
-        minimumCoords = -0.5
-        maximumCoords = 0.5
-        
-        # Ray directions and origins
-        Dx = boxRay.direction.x
-        Rx = boxRay.origin.x
-        Dy = boxRay.direction.y
-        Ry = boxRay.origin.y
-        Dz = boxRay.direction.z
-        Rz = boxRay.origin.z
-        
-        # Doesn't intersect
-        if Dx == 0:
-            if Rx < minimumCoords or Rx > maximumCoords:
-                return False
-        if Dy == 0:
-            if Ry < minimumCoords or Ry > maximumCoords:
-                return False
-        if Dz == 0:
-            if Rz < minimumCoords or Rz > maximumCoords:
-                return False
-        
-        # Intersections
-        txmin = (-0.5 - Rx)/Dx
-        txmax = (0.5 - Rx)/Dx
-        tymin = (-0.5 - Ry)/Dy
-        tymax = (0.5 - Ry)/Dy
-        tzmin = (-0.5 - Rz)/Dz
-        tzmax = (0.5 - Rz)/Dz
-        
-        # Check x axis
-        if txmin > txmax: 
-            txmin, txmax = [txmax, txmin]
-        if txmin > tnear:
-            tnear = txmin
-        if txmax < tfar:
-            tfar = txmax
-        if tnear > tfar:
-            return False
-        if tfar < 0:
-            return False
-
-        # Check y axis
-        if tymin > tymax: 
-            tymin, tymax = [tymax, tymin]
-        if tymin > tnear:
-            tnear = tymin
-        if tymax < tfar:
-            tfar = tymax
-        if tnear > tfar:
-            return False
-        if tfar < 0:
-            return False
-
-        # Check z axis
-        if tzmin > tzmax: 
-            tzmin, tzmax = [tzmax, tzmin]
-        if tzmin > tnear:
-            tnear = tzmin
-        if tzmax < tfar:
-            tfar = tzmax
-        if tnear > tfar:
-            return False
-        if tfar < 0:
-            return False
-
-        intersectionPoint = Vector3(Rx + Dx * tnear, Ry + Dy * tnear, Rz + Dz * tnear)
-
-        # Calculate normal and apply transformation before transforming the intersection point
-        normal =  self.calculate_normal()
-
-        # (Step 3) Convert point to homogenoeus coordinates (object coordinates), transform it, and bring it back to world coordinates (cartesian coordinates)     
-        intersectionPoint = intersectionPoint.convert_point3_vector4()
-        intersectionPoint = transformList[B][FINAL] * intersectionPoint
-        intersectionPoint = intersectionPoint.convert_point4_vector3()
-        
-        # Calculate distance
-        distance = intersectionPoint - boxRay.origin
-        hit.t = distance.calculate_distance()
-        
-        # Intersection is verified
-        if hit.t >= epsilon and hit.t < hit.t_min:
-        
-            # Transform normal
-            normal = normal.convert_vector3_vector4()
-            normal = transformList[B][TRAN] * normal
-            normal = normal.convert_vector4_vector3()
-            normal = normal.normalize_vector()
-        
-            hit.found = True
-            hit.t_min = hit.t
-            hit.material = self.material
-            hit.normal = normal
-            hit.point = intersectionPoint
-            hit.is_floor = False
-            return True
-        
-        return False
-    
-
-    def intersect_shadow(self, shadowRay: Ray, shadowHit: Hit, transformList: list) -> bool:
-        """
-        Checks if the ray hits the object or not.
-        :param Ray ray: Current ray being analyzed.
-        :param Hit hit: Information about the ray intersection with the current object. If no intersection, hit.found = False, rest is irrelevant.
-        :returns: True if ray intersects current object, False if not
-        :rtype: bool
-        """
-        epsilon = 1.0E-6
-        
-        boxRay = None
-        del boxRay
-        # (Step 1) Ray copy for the box. Transforming the ray
-        boxRay = copy.copy(shadowRay)
-        boxRay.direction = boxRay.direction.convert_vector3_vector4()
-        boxRay.direction = transformList[B][INV] * boxRay.direction
-        boxRay.direction = boxRay.direction.convert_vector4_vector3()
-        boxRay.direction = boxRay.direction.normalize_vector()
-
-        boxRay.origin = boxRay.origin.convert_point3_vector4()
-        boxRay.origin = transformList[B][INV] * boxRay.origin
-        boxRay.origin = boxRay.origin.convert_point4_vector3()
-        
-        tnear = -1000
-        tfar = 1000
-
-        minimumCoords = -0.5
-        maximumCoords = 0.5
-        
-        # Ray directions and origins
-        Dx = boxRay.direction.x
-        Rx = boxRay.origin.x
-        Dy = boxRay.direction.y
-        Ry = boxRay.origin.y
-        Dz = boxRay.direction.z
-        Rz = boxRay.origin.z
-        
-        # Doesn't intersect
-        if Dx == 0:
-            if Rx < minimumCoords or Rx > maximumCoords:
-                return False
-        if Dy == 0:
-            if Ry < minimumCoords or Ry > maximumCoords:
-                return False
-        if Dz == 0:
-            if Rz < minimumCoords or Rz > maximumCoords:
-                return False
-        
-        # Intersections
-        txmin = (-0.5 - Rx)/Dx
-        txmax = (0.5 - Rx)/Dx
-        tymin = (-0.5 - Ry)/Dy
-        tymax = (0.5 - Ry)/Dy
-        tzmin = (-0.5 - Rz)/Dz
-        tzmax = (0.5 - Rz)/Dz
-        
-        # Check x axis
-        if txmin > txmax: 
-            txmin, txmax = [txmax, txmin]
-        if txmin > tnear:
-            tnear = txmin
-        if txmax < tfar:
-            tfar = txmax
-        if tnear > tfar:
-            return False
-        if tfar < 0:
-            return False
-
-        # Check y axis
-        if tymin > tymax: 
-            tymin, tymax = [tymax, tymin]
-        if tymin > tnear:
-            tnear = tymin
-        if tymax < tfar:
-            tfar = tymax
-        if tnear > tfar:
-            return False
-        if tfar < 0:
-            return False
-
-        # Check z axis
-        if tzmin > tzmax: 
-            tzmin, tzmax = [tzmax, tzmin]
-        if tzmin > tnear:
-            tnear = tzmin
-        if tzmax < tfar:
-            tfar = tzmax
-        if tnear > tfar:
-            return False
-        if tfar < 0:
-            return False
-
-        intersectionPoint = Vector3(Rx + Dx * tnear, Ry + Dy * tnear, Rz + Dz * tnear)
-
-        # Calculate normal and apply transformation before transforming the intersection point
-        normal =  self.calculate_normal()
-
-        # (Step 3) Convert point to homogenoeus coordinates (object coordinates), transform it, and bring it back to world coordinates (cartesian coordinates)     
-        #intersectionPoint = intersectionPoint.convert_point3_vector4()
-        #intersectionPoint = transformList[B][FINAL] * intersectionPoint
-        #intersectionPoint = intersectionPoint.convert_point4_vector3()
-        
-        # Calculate distance
-        distance = intersectionPoint - boxRay.origin
-        shadowHit.t = distance.calculate_distance()
-        
-        # Intersection is verified
-        if shadowHit.t >= epsilon and shadowHit.t < shadowHit.t_min:
-        
-            # Transform normal
-            normal = normal.convert_vector3_vector4()
-            normal = transformList[B][TRAN] * normal
-            normal = normal.convert_vector4_vector3()
-            normal = normal.normalize_vector()
-        
-            shadowHit.found = True
-            shadowHit.t_min = shadowHit.t
-            shadowHit.material = self.material
-            shadowHit.normal = normal
-            shadowHit.point = intersectionPoint
-            return True
-        
-        return False
-
-
-
-class Sphere(Object3D):
-    """
-    Represents a Sphere 3D object. Inherits from base super class "Object3D"
-    :param Transformation transformation: Applied object transformation
-    :param Material material: Object material
-    """
-
-    def __init__(self, transformation, material):
-        super().__init__(transformation, material)
-
-    
-    def calculate_normal(self, point: Vector3):
-        """
-        Calculates sphere's normal on intersection point.
-        :returns: Sphere's normal in intersection point.
-        :rtype: Vector3
-        """
-        scalar = float(np.sqrt(point.calculate_scalar_product(point)))
-        normal = Vector3(float(point.x / scalar), float(point.y / scalar), float(point.z / scalar))
-        return normal
-    
-
-    def intersect(self, sphereRay: Ray, hit: Hit, transformList:list) -> bool:
-        """
-        Calculates if a ray hits a sphere or not.
-        :param Ray ray: Current ray being cast.
-        :param Hit hit: Class to store hit properties if the ray intersects the sphere
-        :returns: Wether the ray intersects the sphere or not.
-        :rtype: bool
-        """
-        epsilon = 1 * pow(10, -6)
-
-        # Sphere center and radius
-        sphereCenter = Vector3(0, 0, 0)
-        radius = 1
-        
-        # (Step 2) Calculate point if there is an intersection point between the sphereRay and the current object
-
-        # Distance from ray origin to sphere center
-        originToCenter = sphereCenter - sphereRay.origin
-
-        # Dot product between distance from ray origin to sphere center and ray direction
-        v = originToCenter.calculate_scalar_product(sphereRay.direction)
-
-        # Discriminant
-        discriminant = pow(radius, 2) - (originToCenter.calculate_scalar_product(originToCenter) - (v * v))
-
-        if discriminant < 0:
-            # No intersection
-            return False
-        else:
-
-            # If it intersects, we calculate the intersection point
-            d = np.sqrt(discriminant)
-            point = sphereRay.origin + (sphereRay.direction * (v - d))
-            
-            # Calculate normal and apply transformation before transforming the intersection point
-            normal = self.calculate_normal(point)
-
-            # (Step 3) Convert point to homogenoeus coordinates (object coordinates), transform it, and bring it back to world coordinates (cartesian coordinates)
-            point = point.convert_point3_vector4()
-            point = transformList[S][FINAL] * point
-            point = point.convert_point4_vector3()
-
-            # Then the distance from the camera to the intersection point
-            distance = point - sphereRay.origin
-            hit.t = distance.calculate_distance()
-
-            # And check if it is smaller than the lowest distance and also epsilon
-            if hit.t >= epsilon and hit.t < hit.t_min:
-                # Transform normal
-                normal = normal.convert_vector3_vector4()
-                normal = transformList[T][TRAN] * normal
-                normal = normal.convert_vector4_vector3()
-                normal = normal.normalize_vector()
-
-                hit.found = True
-                hit.t_min = hit.t
-                hit.point = point        
-                hit.material = self.material
-                hit.normal = normal
-                hit.is_floor = False
-                return True
-
-            return False
-
-
-    def intersect_shadow(self, shadowRay: Ray, shadowHit: Hit, transformList:list) -> bool:
-        """
-        Calculates if a ray hits a sphere or not.
-        :param Ray ray: Current ray being cast.
-        :param Hit hit: Class to store hit properties if the ray intersects the sphere
-        :returns: Wether the ray intersects the sphere or not.
-        :rtype: bool
-        """
-        epsilon = 1 * pow(10, -6)
-
-        # (Step 1) Ray copy for the sphere. Transforming the ray
-        sphereRay = None
-        del sphereRay
-        sphereRay = copy.copy(shadowRay)
-        sphereRay.direction = sphereRay.direction.convert_vector3_vector4()
-        sphereRay.direction = transformList[S][INV] * sphereRay.direction
-        sphereRay.direction = sphereRay.direction.convert_vector4_vector3()
-        sphereRay.direction = sphereRay.direction.normalize_vector()
-
-        sphereRay.origin = sphereRay.origin.convert_point3_vector4()
-        sphereRay.origin = transformList[S][INV] * sphereRay.origin
-        sphereRay.origin = sphereRay.origin.convert_point4_vector3()
-
-        # Sphere center and radius
-        sphereCenter = Vector3(0, 0, 0)
-        radius = 1
-        
-        # (Step 2) Calculate point if there is an intersection point between the sphereRay and the current object
-
-        # Distance from ray origin to sphere center
-        originToCenter = sphereCenter - sphereRay.origin
-
-        # Dot product between distance from ray origin to sphere center and ray direction
-        v = originToCenter.calculate_scalar_product(sphereRay.direction)
-
-        # Discriminant
-        discriminant = pow(radius, 2) - (originToCenter.calculate_scalar_product(originToCenter) - (v * v))
-
-        if discriminant < 0:
-            # No intersection
-            return False
-        else:
-
-            # If it intersects, we calculate the intersection point
-            d = np.sqrt(discriminant)
-            point = sphereRay.origin + (sphereRay.direction * (v - d))
-            
-            # Calculate normal and apply transformation before transforming the intersection point
-            normal = self.calculate_normal(point)
-
-            # (Step 3) Convert point to homogenoeus coordinates (object coordinates), transform it, and bring it back to world coordinates (cartesian coordinates)
-            #point = point.convert_point3_vector4()
-            #point = transformList[S][FINAL] * point
-            #point = point.convert_point4_vector3()
-
-            # Then the distance from the camera to the intersection point
-            distance = point - sphereRay.origin
-            shadowHit.t = distance.calculate_distance()
-
-            # And check if it is smaller than the lowest distance and also epsilon
-            if shadowHit.t >= epsilon and shadowHit.t < shadowHit.t_min:
-                # Transform normal
-                normal = normal.convert_vector3_vector4()
-                normal = transformList[T][TRAN] * normal
-                normal = normal.convert_vector4_vector3()
-                normal = normal.normalize_vector()
-
-                shadowHit.found = True
-                shadowHit.t_min = shadowHit.t
-                shadowHit.point = point        
-                shadowHit.material = self.material
-                shadowHit.normal = normal
-                return True
-
-            return False
