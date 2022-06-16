@@ -425,12 +425,16 @@ def trace_rays(ray: Ray, rec: int, sceneObjects: list, transformList: list, tria
     :returns: A Color3 object
     :rtype: Color3
     """
+    sceneObjects2 = copy.copy(sceneObjects)
     hit = Hit(False, Material(Color3(0.0, 0.0, 0.0), 0.0, 0.0, 0.0, 0.0, 1.0), Vector3(0, 0, 0), Vector3(0, 0, 0), 0.0, float(1 * pow(10, 12)))
     for objecto in sceneObjects: # TODO add them all together by uncommenting box and sphere intersect and removing the if len
         if isinstance(objecto, TrianglesMesh):
-            #if len(objecto.triangleList) == 6 or len(objecto.triangleList) == 128: # Só estamos a fazer para o chão para já, para acelerar os testes
-            for triangle in objecto.triangleList:
-                triangle.intersect(triangleRay, hit, transformList)
+            if len(objecto.triangleList) == 128:
+                for triangle in objecto.triangleList:
+                    triangle.intersect(triangleRay, hit, transformList, True)
+            else:
+                for triangle in objecto.triangleList:
+                    triangle.intersect(triangleRay, hit, transformList, False)
             pass
         if isinstance(objecto, Box):
             objecto.intersect(boxRay, hit, transformList)
@@ -470,23 +474,23 @@ def trace_rays(ray: Ray, rec: int, sceneObjects: list, transformList: list, tria
                 #shadowRay.direction = shadowRay.direction.convert_vector4_vector3()
                 #shadowRay.direction = shadowRay.direction.normalize_vector()
 
-                for item in sceneObjects:
+                for item in sceneObjects2:
                     if isinstance(item, TrianglesMesh):
-                        #if len(item.triangleList) == 6 or len(item.triangleList) == 128: # TODO Add them all together
-                        #    for triangle2 in item.triangleList:
-                        #        triangle2.intersect_shadow(shadowRay, shadowHit, transformList)
+                        #if len(item.triangleList) == 128: # TODO Add them all together
+                        for triangle2 in item.triangleList:
+                            triangle2.intersect_shadow(shadowRay, shadowHit, transformList)
                         pass
                     if isinstance(item, Box):
-                        #item.intersect(shadowRay, shadowHit, transformList)
+                        item.intersect_shadow(shadowRay, shadowHit, transformList)
                         pass
                     if isinstance(item, Sphere):
-                        #item.intersect(shadowRay, shadowHit, transformList)
+                        item.intersect_shadow(shadowRay, shadowHit, transformList)
                         pass
-                    
+
                     if shadowHit.found:
                         break
-                
-                if not shadowHit.found:
+                    
+                if not shadowHit.found or not hit.is_floor:
                     color = color + ((light.color * hit.material.diffuseColor) * cosTheta)
 
         #if rec > 0:
