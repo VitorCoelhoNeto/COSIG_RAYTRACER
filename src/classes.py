@@ -352,6 +352,7 @@ class Ray:
             raise TypeError("direction value must be of Vector3 type")
         self.origin = origin
         self.direction = direction
+        self.origin_original = copy.deepcopy(origin)
 
     def point_at_parameter(self, t):
         """
