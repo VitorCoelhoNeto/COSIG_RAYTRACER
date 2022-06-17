@@ -1,10 +1,11 @@
 import sys
-import json
-import re
 import copy
 from tqdm import tqdm
 from raytracerGUI  import *
-from classes import *
+from sphere import *
+from box import *
+from triangles import *
+from parser import *
 
 C = 0
 S = 1
@@ -25,257 +26,6 @@ def window():
     ui.setupUi(MainWindow)
     MainWindow.show()
     sys.exit(app.exec_())
-
-
-
-def parser(path):
-    """
-    Parses the text file containing the scene's objects' properties.
-    :param str path: Path to the scene file
-    """
-
-    def parse_image(imgNumber, lines, iteration, imageContents):
-        """
-        Parses image objects.
-        :param int imgNumber: Current image object count
-        :param list lines: Lines read from the scene file
-        :param int iteration: Current lines list iteration
-        :param dict imageContents: Dictionary containing objects' properties
-        :returns: imgNumber
-        :rtype: int
-        """
-        IMG_X     = 0
-        IMG_Y     = 1
-        IMG_RED   = 0
-        IMG_GREEN = 1
-        IMG_BLUE  = 2
-        imgNumber += 1
-        if imgNumber > 1:
-            raise Exception("There may be only one segment of type 'Images'")
-        try:
-            res = lines[iteration + 2].strip().split()
-            colors = lines[iteration + 3].strip().split()
-            imageContents["Images"].update({imgNumber-1:{"Resolution":{"X":res[IMG_X], "Y":res[IMG_Y]}, "BG_Color":{"Red":colors[IMG_RED], "Green":colors[IMG_GREEN], "Blue":colors[IMG_BLUE]}}})
-        except:
-            raise Exception("Error parsing image segment")
-        return imgNumber
-
-    
-    def parse_transform(transformNumber, imageContents, lines, iteration):
-        """
-        Parses transformation objects.
-        :param int transformNumber: Current transformation object count
-        :param list lines: Lines read from the scene file
-        :param int iteration: Current lines list iteration
-        :param dict imageContents: Dictionary containing objects' properties
-        :returns: transformNumber
-        :rtype: int
-        """
-        X = 1
-        Y = 2
-        Z = 3
-        R_TYPE = 0
-        R_VALUE = 1
-        transformNumber += 1
-        imageContents["Transformations"].update({transformNumber-1:{}})
-        for transLine in lines[iteration:]:
-            if "}" in transLine:
-                break
-            if re.search(r'\sT\s', transLine):
-                imageContents["Transformations"][transformNumber-1].update({"Translation":{"X":transLine.strip().split()[X], "Y":transLine.strip().split()[Y], "Z":transLine.strip().split()[Z]}})
-            if re.search(r'\sS\s', transLine):
-                imageContents["Transformations"][transformNumber-1].update({"Scale":{"X":transLine.strip().split()[X], "Y":transLine.strip().split()[Y], "Z":transLine.strip().split()[Z]}})
-            if re.search(r'\sR[a-z]\s', transLine):
-                if not "Rotations" in imageContents["Transformations"][transformNumber-1]:
-                    imageContents["Transformations"][transformNumber-1].update({"Rotations":{}})
-                imageContents["Transformations"][transformNumber-1]["Rotations"][transLine.strip().split()[R_TYPE]] = transLine.strip().split()[R_VALUE]
-        return transformNumber
-
-
-    def parse_material(materialNumber, imageContents, lines, iteration):
-        """
-        Parses transformation objects.
-        :param int materialNumber: Current material object count
-        :param list lines: Lines read from the scene file
-        :param int iteration: Current lines list iteration
-        :param dict imageContents: Dictionary containing objects' properties
-        :returns: materialNumber
-        :rtype: int
-        """
-        MAT_R = 0
-        MAT_G = 1
-        MAT_B = 2
-        AMBIENT       = 0
-        DIFFUSE       = 1
-        SPECULAR      = 2
-        REFRACT       = 3
-        REFRACT_INDEX = 4
-        materialNumber += 1
-        matColors = lines[iteration + 2].strip().split()
-        matProperties = lines[iteration + 3].strip().split()
-        imageContents["Materials"].update({materialNumber-1:{"Color":{"Red":matColors[MAT_R], "Green":matColors[MAT_G], "Blue":matColors[MAT_B]}, "Properties":{"Ambient":matProperties[AMBIENT], "Diffuse":matProperties[DIFFUSE], "Specular":matProperties[SPECULAR], "Refraction":matProperties[REFRACT], "Refraction_Index":matProperties[REFRACT_INDEX]}}}) 
-        return materialNumber
-
-
-    def parse_cameras(cameraNumber, imageContents, lines, iteration):
-        """
-        Parses camera objects.
-        :param int cameraNumber: Current camera object count
-        :param list lines: Lines read from the scene file
-        :param int iteration: Current lines list iteration
-        :param dict imageContents: Dictionary containing objects' properties
-        :returns: cameraNumber
-        :rtype: int
-        """
-        CAM_TRAN = 2
-        CAM_DIST = 3
-        CAM_FOV  = 4
-        cameraNumber += 1
-        if cameraNumber > 1:
-            raise Exception("There may be only one camera")
-        transformIndex = lines[iteration + CAM_TRAN].strip()
-        cameraDistance = lines[iteration + CAM_DIST].strip()
-        fieldOfView    = lines[iteration + CAM_FOV].strip()
-        imageContents["Cameras"].update({cameraNumber-1:{"Transformation":transformIndex, "Distance":cameraDistance, "FOV":fieldOfView}})
-        return cameraNumber
-
-    
-    def parse_lights(lightNumber, imageContents, lines, iteration):
-        """
-        Parses light objects.
-        :param int lightNumber: Current light object count
-        :param list lines: Lines read from the scene file
-        :param int iteration: Current lines list iteration
-        :param dict imageContents: Dictionary containing objects' properties
-        :returns: lightNumber
-        :rtype: int
-        """
-        LIGHT_TRAN = 2
-        LIGHT_COLOR = 3
-        LIGHT_R = 0
-        LIGHT_G = 1
-        LIGHT_B = 2
-        lightNumber += 1
-        transformIndex = lines[iteration + LIGHT_TRAN].strip()
-        lightColors = lines[iteration + LIGHT_COLOR].strip().split()
-        imageContents["Lights"].update({lightNumber-1:{"Transformation":transformIndex, "Color":{"Red":lightColors[LIGHT_R], "Green":lightColors[LIGHT_G], "Blue":lightColors[LIGHT_B]}}}) 
-        return lightNumber
-
-
-    def parse_spheres(sphereNumber, imageContents, lines, iteration):
-        """
-        Parses sphere objects.
-        :param int sphereNumber: Current sphere object count
-        :param list lines: Lines read from the scene file
-        :param int iteration: Current lines list iteration
-        :param dict imageContents: Dictionary containing objects' properties
-        :returns: sphereNumber
-        :rtype: int
-        """
-        SPHERE_TRAN = 2
-        SPHERE_MAT  = 3
-        sphereNumber += 1
-        transformIndex = lines[iteration + SPHERE_TRAN].strip()
-        matIndex       = lines[iteration + SPHERE_MAT].strip()
-        imageContents["Spheres"].update({sphereNumber-1:{"Transformation":transformIndex, "Material":matIndex}})
-        return sphereNumber
-    
-
-    def parse_boxes(boxNumber, imageContents, lines, iteration):
-        """
-        Parses box objects.
-        :param int boxNumber: Current box object count
-        :param list lines: Lines read from the scene file
-        :param int iteration: Current lines list iteration
-        :param dict imageContents: Dictionary containing objects' properties
-        :returns: boxNumber
-        :rtype: int
-        """
-        BOX_TRAN = 2
-        BOX_MAT  = 3
-        boxNumber += 1
-        transformIndex = lines[iteration + BOX_TRAN].strip()
-        matIndex       = lines[iteration + BOX_MAT].strip()
-        imageContents["Boxes"].update({boxNumber-1:{"Transformation":transformIndex, "Material":matIndex}})
-        return boxNumber
-    
-
-    def parse_triangles(meshNumber, imageContents, lines, iteration):
-        """
-        Parses box objects.
-        :param int meshNumber: Current triangle meshes object count
-        :param list lines: Lines read from the scene file
-        :param int iteration: Current lines list iteration
-        :param dict imageContents: Dictionary containing objects' properties
-        :returns: meshNumber
-        :rtype: int
-        """
-        V_X = 0
-        V_Y = 1
-        V_Z = 2
-        TRANSFORM_LINE = iteration + 2
-        FIRST_TRIANG_LINE = iteration + 3
-        meshNumber += 1
-        # Add mesh and transformation
-        imageContents["TriangleMeshes"].update({meshNumber-1:{"Transformation":lines[TRANSFORM_LINE].strip(), "Triangles":{}}})
-
-        triangNumber = -1 #So it becomes 1 when we add the first triangle
-        for meshLineCount, meshLine in enumerate(lines[FIRST_TRIANG_LINE:]):
-            if "}" in meshLine:
-                break
-            # Add the triangles and their materials
-            if len(meshLine.strip().split()) == 1:
-                triangNumber += 1
-                imageContents["TriangleMeshes"][meshNumber-1]["Triangles"].update({triangNumber:{
-                "Material":lines[iteration+3+meshLineCount].strip(),
-                "(0,0)":lines[FIRST_TRIANG_LINE+meshLineCount + 1].strip().split()[V_X], "(0,1)":lines[FIRST_TRIANG_LINE+meshLineCount + 1].strip().split()[V_Y], "(0,2)":lines[FIRST_TRIANG_LINE+meshLineCount + 1].strip().split()[V_Z], 
-                "(1,0)":lines[FIRST_TRIANG_LINE+meshLineCount + 2].strip().split()[V_X], "(1,1)":lines[FIRST_TRIANG_LINE+meshLineCount + 2].strip().split()[V_Y], "(1,2)":lines[FIRST_TRIANG_LINE+meshLineCount + 2].strip().split()[V_Z], 
-                "(2,0)":lines[FIRST_TRIANG_LINE+meshLineCount + 3].strip().split()[V_X], "(2,1)":lines[FIRST_TRIANG_LINE+meshLineCount + 3].strip().split()[V_Y], "(2,2)":lines[FIRST_TRIANG_LINE+meshLineCount + 3].strip().split()[V_Z]}})
-        return meshNumber
-
-
-    imageContents = {"Images":{}, "Transformations":{}, "Materials":{}, "Cameras":{}, "Lights":{}, "Spheres":{}, "Boxes":{}, "TriangleMeshes":{}}
-
-    with open(path) as file:
-
-        imgNumber       = 0
-        transformNumber = 0
-        materialNumber  = 0
-        cameraNumber    = 0
-        lightNumber     = 0
-        sphereNumber    = 0
-        boxNumber       = 0
-        meshNumber      = 0
-
-        lines = file.readlines()
-
-        for iteration, line in enumerate(lines):
-
-            if "Image" in line:
-                imgNumber = parse_image(imgNumber, lines, iteration, imageContents)   
-
-            if "Transformation" in line:
-                transformNumber = parse_transform(transformNumber, imageContents, lines, iteration)
-
-            if "Material" in line:
-                materialNumber = parse_material(materialNumber, imageContents, lines, iteration)
-
-            if "Camera" in line:
-                cameraNumber = parse_cameras(cameraNumber, imageContents, lines, iteration)
-
-            if "Light" in line:
-                lightNumber = parse_lights(lightNumber, imageContents, lines, iteration)
-
-            if "Sphere" in line:
-                sphereNumber = parse_spheres(sphereNumber, imageContents, lines, iteration)
-
-            if "Box" in line:
-                boxNumber = parse_boxes(boxNumber, imageContents, lines, iteration)
-            
-            if "Triangles" in line:
-                meshNumber = parse_triangles(meshNumber, imageContents, lines, iteration)
-
-    return imageContents
 
 
 
@@ -417,7 +167,7 @@ def generate_scene_objects(imageContents: dict) -> list:
 
 
 
-def trace_rays(ray: Ray, rec: int, sceneObjects: list, transformList: list, triangleRay: Ray, sphereRay: Ray, boxRay: Ray) -> Color3:
+def trace_rays(ray: Ray, rec: int, sceneObjects: list, transformList: list) -> Color3:
     """
     Traces the rays, recursively following the path the ray takes and returns a color based on the object intersection.
     :param Ray ray: Ray to be traced.
@@ -425,22 +175,23 @@ def trace_rays(ray: Ray, rec: int, sceneObjects: list, transformList: list, tria
     :returns: A Color3 object
     :rtype: Color3
     """
-    sceneObjects2 = copy.copy(sceneObjects)
+
     hit = Hit(False, Material(Color3(0.0, 0.0, 0.0), 0.0, 0.0, 0.0, 0.0, 1.0), Vector3(0, 0, 0), Vector3(0, 0, 0), 0.0, float(1 * pow(10, 12)))
-    for objecto in sceneObjects: # TODO add them all together by uncommenting box and sphere intersect and removing the if len
+    for objecto in sceneObjects: # TODO add them all together
         if isinstance(objecto, TrianglesMesh):
             if len(objecto.triangleList) == 128:
                 for triangle in objecto.triangleList:
-                    triangle.intersect(triangleRay, hit, transformList, True)
+                    triangle.intersect(ray, hit, transformList, True)
             else:
-                for triangle in objecto.triangleList:
-                    triangle.intersect(triangleRay, hit, transformList, False)
+                if len(objecto.triangleList) == 6 or len(objecto.triangleList) == 512:
+                    for triangle in objecto.triangleList:
+                        triangle.intersect(ray, hit, transformList, False)
             pass
         if isinstance(objecto, Box):
-            objecto.intersect(boxRay, hit, transformList)
+            objecto.intersect(ray, hit, transformList)
             pass
         if isinstance(objecto, Sphere):
-            objecto.intersect(sphereRay, hit, transformList)
+            objecto.intersect(ray, hit, transformList)
             pass
 
     if hit.found:
@@ -460,25 +211,23 @@ def trace_rays(ray: Ray, rec: int, sceneObjects: list, transformList: list, tria
             lLength = l.calculate_distance()
             l = l.normalize_vector()
 
+            l2 = copy.deepcopy(l)
+            pointCopy = copy.deepcopy(hit.point)
+
             # Calculate light incidence angle
             cosTheta = hit.normal.calculate_scalar_product(l)
 
             # If light is being incided on the object's normal (less than 90º), add the diffuse coefficient
             if cosTheta > 0.0:
-                shadowRay = Ray(hit.point, l)
+                shadowRay = Ray(pointCopy, l2)
                 shadowHit = Hit(False, Material(Color3(0.0, 0.0, 0.0), 0.0, 0.0, 0.0, 0.0, 1.0), Vector3(0, 0, 0), Vector3(0, 0, 0), 0.0, float(1 * pow(10, 12)))
                 shadowHit.t_min = lLength
 
-                #shadowRay.direction = shadowRay.direction.convert_vector3_vector4()
-                #shadowRay.direction = transformList[L][INV] * shadowRay.direction # TODO not the light transformation, it's each object's
-                #shadowRay.direction = shadowRay.direction.convert_vector4_vector3()
-                #shadowRay.direction = shadowRay.direction.normalize_vector()
-
-                for item in sceneObjects2:
+                for item in sceneObjects:
                     if isinstance(item, TrianglesMesh):
-                        #if len(item.triangleList) == 128: # TODO Add them all together
-                        for triangle2 in item.triangleList:
-                            triangle2.intersect_shadow(shadowRay, shadowHit, transformList)
+                        if len(item.triangleList) == 6 or len(item.triangleList) == 512: # TODO Add them all together
+                            for triangle2 in item.triangleList:
+                                triangle2.intersect_shadow(shadowRay, shadowHit, transformList)
                         pass
                     if isinstance(item, Box):
                         item.intersect_shadow(shadowRay, shadowHit, transformList)
@@ -492,18 +241,37 @@ def trace_rays(ray: Ray, rec: int, sceneObjects: list, transformList: list, tria
                     
                 if not shadowHit.found or not hit.is_floor:
                     color = color + ((light.color * hit.material.diffuseColor) * cosTheta)
-
+        
+        # Refraction and reflection
         #if rec > 0:
-        #    cosThetaV = -ray.direction.calculate_scalar_product(hit.normal)
+        #    rec = rec - 1
+        #    cosThetaV = -(float(copy.deepcopy(ray.direction.calculate_scalar_product(hit.normal))))
         #
-        #    if hit.material.specular > 0.0:
-        #        
-        #        r = ray.direction + (hit.normal * (2.0 * cosThetaV))
-        #        r.normalize_vector()
+        #    #if float(hit.material.specular) > 0.0:
+        #    #    
+        #    #    r = copy.deepcopy(ray.direction) + (copy.deepcopy(hit.normal) * (2.0 * cosThetaV))
+        #    #    r = r.normalize_vector()
+        #    #
+        #    #    reflectedOrigin = copy.deepcopy(hit.point) + (copy.deepcopy(r) * 1.0E-6)
+        #    #
+        #    #    reflectedRayTemp = Ray(reflectedOrigin, r)
+        #    #    reflectedRay = copy.deepcopy(reflectedRayTemp)
+        #    #    
+        #    #    color = color + (hit.material.specularColor * trace_rays(reflectedRay, rec, sceneObjects, transformList))
+        #    
+        #    if float(hit.material.refraction) > 0.0:
+        #        eta = 1.0 / hit.material.refractionIndex
+        #        cosThetaR = np.sqrt(1.0 - eta * eta * (1.0 - cosThetaV * cosThetaV))
         #
-        #        reflectedRay = Ray(hit.point, r)
-        #        
-        #        color = color + hit.material.color * hit.material.specular * trace_rays(reflectedRay, rec - 1, sceneObjects, transformList, triangleRay, sphereRay, boxRay)
+        #        if cosThetaV < 0.0:
+        #            eta = copy.deepcopy(hit.material.refractionIndex)
+        #            cosThetaR = -cosThetaR
+        #
+        #        direction = Vector3(eta * copy.deepcopy(ray.direction) + (eta * cosThetaV - cosThetaR) * hit.normal)
+        #        direction = direction.normalize()
+        #
+        #        refractedRay = Ray(copy.deepcopy(hit.point), direction)
+        #        color = color + (hit.material.refractionColor * trace_rays(refractedRay, rec, sceneObjects, transformList))
 
         # If the ray intersects an object, paint the pixel with the nearest scene object material color with the light interference
         return color / len(sceneObjects[2]) 
@@ -537,7 +305,7 @@ def preliminar_calculations(camera: Camera, image: Image, sceneObjects: list) ->
     origin  = Vector3(0, 0, camDistance)
 
     pixelList = list()
-    rayList = list()
+    #rayList = list()
 
     # Transformations
     # Camera
@@ -550,33 +318,33 @@ def preliminar_calculations(camera: Camera, image: Image, sceneObjects: list) ->
     sphereTransformation.translate(0, -24, 0)
     sphereTransformation.scale(6, 6, 6)
     finalSphereTransformation = cameraTransformation * sphereTransformation
-    inversefinalSphereTransformation = copy.copy(finalSphereTransformation)
+    inversefinalSphereTransformation = copy.deepcopy(finalSphereTransformation)
     inversefinalSphereTransformation.inverse_matrix()
-    transposedFinalSphereTransformation = copy.copy(inversefinalSphereTransformation)
+    transposedFinalSphereTransformation = copy.deepcopy(inversefinalSphereTransformation)
     transposedFinalSphereTransformation.transpose_matrix()
     # Box
     boxTransformation = Transformation()
     boxTransformation.translate(24, 0, 0)
     boxTransformation.scale(12, 12, 12)
     finalBoxTransformation = cameraTransformation * boxTransformation
-    inversefinalBoxTransformation = copy.copy(finalBoxTransformation)
+    inversefinalBoxTransformation = copy.deepcopy(finalBoxTransformation)
     inversefinalBoxTransformation.inverse_matrix()
-    transposedFinalBoxTransformation = copy.copy(inversefinalBoxTransformation)
+    transposedFinalBoxTransformation = copy.deepcopy(inversefinalBoxTransformation)
     transposedFinalBoxTransformation.transpose_matrix()
     # Triangles
     trianglesTransformation = Transformation()
     finalTrianglesTransformation = cameraTransformation * trianglesTransformation
-    inversefinalTrianglesTransformation = copy.copy(finalTrianglesTransformation)
+    inversefinalTrianglesTransformation = copy.deepcopy(finalTrianglesTransformation)
     inversefinalTrianglesTransformation.inverse_matrix()
-    transposedFinalTrianglesTransformation = copy.copy(inversefinalTrianglesTransformation)
+    transposedFinalTrianglesTransformation = copy.deepcopy(inversefinalTrianglesTransformation)
     transposedFinalTrianglesTransformation.transpose_matrix()
     # Lights
     lightsTransformation = Transformation()
     lightsTransformation.translate(-7, 5, 66)
     finalLightsTransformation = cameraTransformation * lightsTransformation
-    inversefinalLightsTransformation = copy.copy(finalLightsTransformation)
+    inversefinalLightsTransformation = copy.deepcopy(finalLightsTransformation)
     inversefinalLightsTransformation.inverse_matrix()
-    transposedFinalLightsTransformation = copy.copy(inversefinalLightsTransformation)
+    transposedFinalLightsTransformation = copy.deepcopy(inversefinalLightsTransformation)
     transposedFinalLightsTransformation.transpose_matrix()
 
     transformList = list()
@@ -597,41 +365,10 @@ def preliminar_calculations(camera: Camera, image: Image, sceneObjects: list) ->
             direction = Vector3(float(pixelX), float(pixelY), -float(camDistance))
             direction = direction.normalize_vector()
             ray = Ray(origin, direction)
-
-            # (Step 1) Ray copy for the triangles. Transforming the ray
-            triangleRay = copy.copy(ray)
-            triangleRay.origin = triangleRay.origin.convert_point3_vector4()
-            triangleRay.origin = transformList[T][INV] * triangleRay.origin
-            triangleRay.origin = triangleRay.origin.convert_point4_vector3()
-            triangleRay.direction = triangleRay.direction.convert_vector3_vector4()
-            triangleRay.direction = transformList[T][INV] * triangleRay.direction
-            triangleRay.direction = triangleRay.direction.convert_vector4_vector3()
-            triangleRay.direction = triangleRay.direction.normalize_vector()
-
-            # (Step 1) Ray copy for the Sphere. Transforming the ray
-            sphereRay = copy.copy(ray)
-            sphereRay.origin = sphereRay.origin.convert_point3_vector4()
-            sphereRay.origin = transformList[S][INV] * sphereRay.origin
-            sphereRay.origin = sphereRay.origin.convert_point4_vector3()
-            sphereRay.direction = sphereRay.direction.convert_vector3_vector4()
-            sphereRay.direction = transformList[S][INV] * sphereRay.direction
-            sphereRay.direction = sphereRay.direction.convert_vector4_vector3()
-            sphereRay.direction = sphereRay.direction.normalize_vector()
-
-            # (Step 1) Ray copy for the Box. Transforming the ray
-            boxRay = copy.copy(ray)
-            boxRay.origin = boxRay.origin.convert_point3_vector4()
-            boxRay.origin = transformList[B][INV] * boxRay.origin
-            boxRay.origin = boxRay.origin.convert_point4_vector3()
-            boxRay.direction = boxRay.direction.convert_vector3_vector4()
-            boxRay.direction = transformList[B][INV] * boxRay.direction
-            boxRay.direction = boxRay.direction.convert_vector4_vector3()
-            boxRay.direction = boxRay.direction.normalize_vector()
-
             rec = 2
-            color = trace_rays(ray, rec, sceneObjects, transformList, triangleRay, sphereRay, boxRay)
+            color = trace_rays(ray, rec, sceneObjects, transformList)
             color.check_range()
-            rayList.append(ray)
+            #rayList.append(ray)
             pixelList.append(Color3(float(int(255.0 * color.red)), float(int(255.0 * color.green)), float(int(255.0 * color.blue))))
 
-    return pixelList, rayList
+    return pixelList #, rayList
