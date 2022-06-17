@@ -73,7 +73,7 @@ class MainWindow(QMainWindow):
         LIST_PYR = 6
         LIST_DON = 7
         sceneObjects = generate_scene_objects(imageContents)
-        pixelList, rayList = preliminar_calculations(sceneObjects[LIST_CAM], sceneObjects[LIST_IMG], sceneObjects)
+        pixelList = preliminar_calculations(sceneObjects[LIST_CAM], sceneObjects[LIST_IMG], sceneObjects)
         
         for pixel in pixelList:
             self.pixelListMain.append([int(pixel.red), int(pixel.green), int(pixel.blue)])
