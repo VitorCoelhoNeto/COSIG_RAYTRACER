@@ -113,7 +113,7 @@ class Triangle(Object3D):
                 point = transformList[T][FINAL] * point
                 point = point.convert_point4_vector3()
 
-                v = point - triangleRay.origin
+                v = point - triangleRay.origin_original
                 hit.t = v.calculate_distance()
                 
                 if hit.t >= epsilon and hit.t < hit.t_min:
@@ -196,7 +196,7 @@ class Triangle(Object3D):
                 #point = transformList[T][FINAL] * point
                 #point = point.convert_point4_vector3()
     
-                v = point - triangleRay.origin
+                v = point - triangleRay.origin_original
                 hit.t = v.calculate_distance()
                 if hit.t >= epsilon and hit.t < hit.t_min:
                     # Transform normal

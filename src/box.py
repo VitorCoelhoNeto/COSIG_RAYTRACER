@@ -12,25 +12,18 @@ class Box(Object3D):
         self.bounds=[Vector3(-0.5, -0.5, -0.5), Vector3(0.5,0.5,0.5)]
 
     
-    def calculate_normal(self):  # TODO Calculate box normal
+    def calculate_normal(self, intersectionPoint):  # TODO Calculate box normal
         """
         Calculates box's normal on intersection point.
         :returns: Box's normal on intersection point.
         :rtype: Vector3
         """
-        #var newV1 = Vector3.Subtract(v1, v0);
-        #var newV2 = Vector3.Subtract(v2, v0);
-        #var newX = ((newV1.Y * newV2.Z) - (newV1.Z * newV2.Y));
-        #var newY = ((newV1.Z * newV2.X) - (newV1.X * newV2.Z));
-        #var newZ = ((newV1.X * newV2.Y) - (newV1.Y * newV2.X));
-        #var size = Math.Sqrt(Math.Pow(newX, 2) + Math.Pow(newY, 2) + Math.Pow(newZ, 2));
-        #return new Vector3
-        #{
-        #    X = (float)(newX / size),
-        #    Y = (float)(newY / size),
-        #    Z = (float)(newZ / size)
-        #};
-        return Vector3(1, 1, 1)
+        point = copy.deepcopy(intersectionPoint)
+
+        scalar = float(point.calculate_scalar_product(point))
+        normal = Vector3(float(point.x / scalar), float(point.y / scalar), float(point.z / scalar))
+
+        return normal.normalize_vector()
 
     
     def intersect(self, ray: Ray, hit: Hit, transformList: list) -> bool:
@@ -125,7 +118,7 @@ class Box(Object3D):
         intersectionPoint = Vector3(Rx + Dx * tnear, Ry + Dy * tnear, Rz + Dz * tnear)
 
         # Calculate normal and apply transformation before transforming the intersection point
-        normal =  self.calculate_normal()
+        normal =  self.calculate_normal(intersectionPoint)
 
         # (Step 3) Convert point to homogenoeus coordinates (object coordinates), transform it, and bring it back to world coordinates (cartesian coordinates)     
         intersectionPoint = intersectionPoint.convert_point3_vector4()
@@ -133,7 +126,7 @@ class Box(Object3D):
         intersectionPoint = intersectionPoint.convert_point4_vector3()
         
         # Calculate distance
-        distance = intersectionPoint - boxRay.origin
+        distance = intersectionPoint - boxRay.origin_original
         hit.t = distance.calculate_distance()
         
         # Intersection is verified
@@ -251,7 +244,7 @@ class Box(Object3D):
         intersectionPoint = Vector3(Rx + Dx * tnear, Ry + Dy * tnear, Rz + Dz * tnear)
 
         # Calculate normal and apply transformation before transforming the intersection point
-        normal =  self.calculate_normal()
+        normal =  self.calculate_normal(intersectionPoint)
 
         # (Step 3) Convert point to homogenoeus coordinates (object coordinates), transform it, and bring it back to world coordinates (cartesian coordinates)     
         #intersectionPoint = intersectionPoint.convert_point3_vector4()
