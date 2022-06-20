@@ -213,12 +213,15 @@ class Box(Object3D):
         tymax = (0.5 - Ry)/Dy
         tzmin = (-0.5 - Rz)/Dz
         tzmax = (0.5 - Rz)/Dz
-        
+
+        plane = "None"
+
         # Check x axis
         if txmin > txmax: 
             txmin, txmax = [txmax, txmin]
         if txmin > tnear:
             tnear = txmin
+            plane = "X"
         if txmax < tfar:
             tfar = txmax
         if tnear > tfar:
@@ -231,6 +234,7 @@ class Box(Object3D):
             tymin, tymax = [tymax, tymin]
         if tymin > tnear:
             tnear = tymin
+            plane = "Y"
         if tymax < tfar:
             tfar = tymax
         if tnear > tfar:
@@ -243,6 +247,7 @@ class Box(Object3D):
             tzmin, tzmax = [tzmax, tzmin]
         if tzmin > tnear:
             tnear = tzmin
+            plane = "Z"
         if tzmax < tfar:
             tfar = tzmax
         if tnear > tfar:
@@ -253,7 +258,7 @@ class Box(Object3D):
         intersectionPoint = Vector3(Rx + Dx * tnear, Ry + Dy * tnear, Rz + Dz * tnear)
 
         # Calculate normal and apply transformation before transforming the intersection point
-        normal =  self.calculate_normal(intersectionPoint)
+        normal =  self.calculate_normal(tnear, plane)
 
         # (Step 3) Convert point to homogenoeus coordinates (object coordinates), transform it, and bring it back to world coordinates (cartesian coordinates)     
         #intersectionPoint = intersectionPoint.convert_point3_vector4()
