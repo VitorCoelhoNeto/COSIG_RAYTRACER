@@ -12,7 +12,7 @@ class Box(Object3D):
         self.bounds=[Vector3(-0.5, -0.5, -0.5), Vector3(0.5,0.5,0.5)]
 
     
-    def calculate_normal(self, intersectionPoint):  # TODO Calculate box normal
+    def calculate_normal(self, intersectionPoint, plane):  # TODO Calculate box normal
         """
         Calculates box's normal on intersection point.
         :returns: Box's normal on intersection point.
@@ -20,11 +20,15 @@ class Box(Object3D):
         """
         point = copy.deepcopy(intersectionPoint)
 
-        scalar = float(point.calculate_scalar_product(point))
-        normal = Vector3(float(point.x / scalar), float(point.y / scalar), float(point.z / scalar))
-
-        return normal.normalize_vector()
-
+        if plane == "Z":
+            return Vector3(0, 0, point)
+        if plane == "Y":
+            return Vector3(0, point, 0)
+        if plane == "X":
+            return Vector3(point, 0, 0)
+        else:
+            return Vector3(1, 1, 1)
+        
     
     def intersect(self, ray: Ray, hit: Hit, transformList: list) -> bool:
         """
@@ -78,12 +82,15 @@ class Box(Object3D):
         tymax = (0.5 - Ry)/Dy
         tzmin = (-0.5 - Rz)/Dz
         tzmax = (0.5 - Rz)/Dz
+
+        plane = "NONE"
         
         # Check x axis
         if txmin > txmax: 
             txmin, txmax = [txmax, txmin]
         if txmin > tnear:
             tnear = txmin
+            plane = "X"
         if txmax < tfar:
             tfar = txmax
         if tnear > tfar:
@@ -96,6 +103,7 @@ class Box(Object3D):
             tymin, tymax = [tymax, tymin]
         if tymin > tnear:
             tnear = tymin
+            plane = "Y"
         if tymax < tfar:
             tfar = tymax
         if tnear > tfar:
@@ -108,6 +116,7 @@ class Box(Object3D):
             tzmin, tzmax = [tzmax, tzmin]
         if tzmin > tnear:
             tnear = tzmin
+            plane = "Z"
         if tzmax < tfar:
             tfar = tzmax
         if tnear > tfar:
@@ -118,7 +127,7 @@ class Box(Object3D):
         intersectionPoint = Vector3(Rx + Dx * tnear, Ry + Dy * tnear, Rz + Dz * tnear)
 
         # Calculate normal and apply transformation before transforming the intersection point
-        normal =  self.calculate_normal(intersectionPoint)
+        normal =  self.calculate_normal(tnear, plane)
 
         # (Step 3) Convert point to homogenoeus coordinates (object coordinates), transform it, and bring it back to world coordinates (cartesian coordinates)     
         intersectionPoint = intersectionPoint.convert_point3_vector4()
