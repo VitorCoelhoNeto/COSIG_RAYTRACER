@@ -73,7 +73,7 @@ def calculate_mesh_normals(triangleList):
 
 
 
-def generate_scene_objects(imageContents: dict) -> list:
+def generate_scene_objects(imageContents: dict, camFov, camDistance) -> list:
     """
     Generates the objects present on the scene
     :param dict imageContents: Dictionary containing objects' properties
@@ -88,8 +88,8 @@ def generate_scene_objects(imageContents: dict) -> list:
     camTransformation.translate(float(camTranslation["X"]), float(camTranslation["Y"]), float(camTranslation["Z"]))
     camTransformation.rotateX(float(imageContents["Transformations"][int(imageContents["Cameras"][0]["Transformation"])]["Rotations"]["Rx"]))
     camTransformation.rotateZ(float(imageContents["Transformations"][int(imageContents["Cameras"][0]["Transformation"])]["Rotations"]["Rz"]))
-    camDistance = float(imageContents["Cameras"][0]["Distance"])
-    camFOV = float(imageContents["Cameras"][0]["FOV"])
+    camDistance = float(camDistance)#float(imageContents["Cameras"][0]["Distance"])
+    camFOV = float(camFov)#float(imageContents["Cameras"][0]["FOV"])
     camera = Camera(camTransformation, camDistance, camFOV)
     sceneObjects.append(camera)
 
@@ -184,7 +184,7 @@ def trace_rays(ray: Ray, rec: int, sceneObjects: list, transformList: list) -> C
                     triangle.intersect(ray, hit, transformList, True)
                 pass
             else:
-                if len(objecto.triangleList) == 6: # or len(objecto.triangleList) == 512:
+                if len(objecto.triangleList) == 6 or len(objecto.triangleList) == 512:
                     for triangle in objecto.triangleList:
                         triangle.intersect(ray, hit, transformList, False)
                 pass
@@ -227,7 +227,7 @@ def trace_rays(ray: Ray, rec: int, sceneObjects: list, transformList: list) -> C
 
                 for item in sceneObjects:
                     if isinstance(item, TrianglesMesh):
-                        if len(item.triangleList) == 6: # or len(item.triangleList) == 512: # TODO Add them all together
+                        if len(item.triangleList) == 6 or len(item.triangleList) == 512:
                             for triangle2 in item.triangleList:
                                 triangle2.intersect_shadow(shadowRay, shadowHit, transformList)
                         pass
@@ -245,37 +245,37 @@ def trace_rays(ray: Ray, rec: int, sceneObjects: list, transformList: list) -> C
                     color = color + ((light.color * hit.material.diffuseColor) * cosTheta)
         
         # Refraction and reflection
-        #if rec > 0:
-        #    rec = rec - 1
-        #    cosThetaV = -(float(copy.deepcopy(ray.direction.calculate_scalar_product(hit.normal))))
-        #
-        #    # Reflection
-        #    if float(hit.material.specular) > 0.0:
-        #        
-        #        r = copy.deepcopy(ray.direction) + (copy.deepcopy(hit.normal) * (2.0 * cosThetaV))
-        #        r = r.normalize_vector()
-        #    
-        #        reflectedOrigin = copy.deepcopy(hit.point) + (copy.deepcopy(r) * 1.0E-6)
-        #    
-        #        reflectedRayTemp = Ray(reflectedOrigin, r)
-        #        reflectedRay = copy.deepcopy(reflectedRayTemp)
-        #        
-        #        color = color + (hit.material.specularColor * trace_rays(reflectedRay, rec, sceneObjects, transformList))
-        #    
-        #    # Refraction
-        #    if float(hit.material.refraction) > 0.0:
-        #        eta = 1.0 / hit.material.refractionIndex
-        #        cosThetaR = np.sqrt(1.0 - eta * eta * (1.0 - cosThetaV * cosThetaV))
-        #
-        #        if cosThetaV < 0.0:
-        #            eta = copy.deepcopy(hit.material.refractionIndex)
-        #            cosThetaR = -cosThetaR
-        #
-        #        direction2 = (copy.deepcopy(ray.direction) * eta) + (hit.normal * ((eta * cosThetaV) - cosThetaR))
-        #        direction2 = direction2.normalize_vector()
-        #
-        #        refractedRay = Ray(copy.deepcopy(hit.point), direction2)
-        #        color = color + (hit.material.refractionColor * trace_rays(refractedRay, rec, sceneObjects, transformList))
+        if rec > 0:
+            rec = rec - 1
+            cosThetaV = -(float(copy.deepcopy(ray.direction.calculate_scalar_product(hit.normal))))
+        
+            # Reflection
+            if float(hit.material.specular) > 0.0:
+                
+                r = copy.deepcopy(ray.direction) + (copy.deepcopy(hit.normal) * (2.0 * cosThetaV))
+                r = r.normalize_vector()
+            
+                reflectedOrigin = copy.deepcopy(hit.point) + (copy.deepcopy(r) * 1.0E-6)
+            
+                reflectedRayTemp = Ray(reflectedOrigin, r)
+                reflectedRay = copy.deepcopy(reflectedRayTemp)
+                
+                color = color + (hit.material.specularColor * trace_rays(reflectedRay, rec, sceneObjects, transformList))
+            
+            # Refraction
+            if float(hit.material.refraction) > 0.0:
+                eta = 1.0 / hit.material.refractionIndex
+                cosThetaR = np.sqrt(1.0 - eta * eta * (1.0 - cosThetaV * cosThetaV))
+        
+                if cosThetaV < 0.0:
+                    eta = copy.deepcopy(hit.material.refractionIndex)
+                    cosThetaR = -cosThetaR
+        
+                direction2 = (copy.deepcopy(ray.direction) * eta) + (hit.normal * ((eta * cosThetaV) - cosThetaR))
+                direction2 = direction2.normalize_vector()
+            
+                refractedRay = Ray(copy.deepcopy(hit.point), copy.deepcopy(direction2))
+                color = color + (hit.material.refractionColor * trace_rays(copy.deepcopy(refractedRay), rec, sceneObjects, transformList))
 
         # If the ray intersects an object, paint the pixel with the nearest scene object material color with the light interference
         return color / len(sceneObjects[2]) 
@@ -285,7 +285,7 @@ def trace_rays(ray: Ray, rec: int, sceneObjects: list, transformList: list) -> C
 
 
 
-def preliminar_calculations(camera: Camera, image: Image, sceneObjects: list) -> list:
+def preliminar_calculations(camera: Camera, image: Image, sceneObjects: list, rec: int) -> list:
     """
     Preliminar calculations
     :param Camera camera: Scene's camera object.
@@ -369,7 +369,7 @@ def preliminar_calculations(camera: Camera, image: Image, sceneObjects: list) ->
             direction = Vector3(float(pixelX), float(pixelY), -float(camDistance))
             direction = direction.normalize_vector()
             ray = Ray(origin, direction)
-            rec = 2
+            #rec = 2
             color = trace_rays(ray, rec, sceneObjects, transformList)
             color.check_range()
             #rayList.append(ray)
