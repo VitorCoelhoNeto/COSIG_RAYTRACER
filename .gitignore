@@ -10,6 +10,7 @@ __pycache__/
 temp.txt
 temp.json
 backup_stuff/
+finalImage.png
 
 # Distribution / packaging
 .Python
