@@ -18,9 +18,10 @@ class Sphere(Object3D):
         :rtype: Vector3
         """
         point = copy.deepcopy(vec3)
-        scalar = float(np.sqrt(point.calculate_scalar_product(point)))
-        normal = Vector3(float(point.x / scalar), float(point.y / scalar), float(point.z / scalar))
-        return normal.normalize_vector()
+        #scalar = float(np.sqrt(point.calculate_scalar_product(point)))
+        #normal = Vector3(float(point.x / scalar), float(point.y / scalar), float(point.z / scalar))
+        #return normal.normalize_vector()
+        return Vector3(point.x, point.y, point.z)
     
 
     def intersect(self, ray: Ray, hit: Hit, transformList:list) -> bool:
